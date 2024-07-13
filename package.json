@@ -4,12 +4,13 @@
   "description": "",
   "main": "src/index.mjs",
   "scripts": {
+    "build": "webpack",
     "dev": "webpack --watch"
   },
   "author": "ading2210",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "libcurl.js": "^0.6.8"
+    "libcurl.js": "^0.6.10"
   },
   "devDependencies": {
     "webpack": "^5.92.1"

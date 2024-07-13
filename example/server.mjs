@@ -1,4 +1,4 @@
-import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
+import { server as wisp } from "@mercuryworkshop/wisp-js/server";
 import express from "express";
 import morgan from "morgan";
 

@@ -37,11 +37,12 @@ function handle_procedure_reply(msg) {
 
 async function message_listener(event) {
   let msg = event.data;
+  console.log("got", msg);
 
   if (msg.type === "procedure") {
     let output = await handle_procedure_call(msg);
     if (output) {
-      event.source.postMessage(output);
+      event.source.postMessage(output, "*");
     }
   }
   else if (msg.type === "reply") {
@@ -50,6 +51,9 @@ async function message_listener(event) {
 }
 
 export async function call_procedure(target, procedure, args) {
+  if (target instanceof HTMLIFrameElement) {
+    target = target.contentWindow;
+  }
   let msg = {
     type: "procedure",
     id: Math.random() + "",
@@ -62,7 +66,8 @@ export async function call_procedure(target, procedure, args) {
       if (reply.success) resolve(reply.value);
       else reject(reply.value);
     }
-    target.postMessage(msg);  
+    console.log("sending", msg);
+    target.postMessage(msg, "*");  
   });
 }
 

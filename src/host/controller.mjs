@@ -6,7 +6,7 @@ let frame_url = null;
 
 export const iframes = {};
 
-async function get_frame_bundle() {
+function get_frame_bundle() {
   if (!frame_url) {
     let frame_html = `
       <!DOCTYPE html>
@@ -22,38 +22,31 @@ async function get_frame_bundle() {
   return frame_url;
 }
 
-class ProxyFrame {
+export class ProxyFrame {
   constructor() {
     this.url = null;
     this.id = Math.random() + "";
     this.iframe = document.createElement("iframe");
-
+    
     this.iframe.sandbox = "allow-scripts";
-    this.iframe.setAttribute("frame-id", frame_id);
+    this.iframe.setAttribute("frame-id", this.id);
     this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
   }
 
   async navigate_to(url) {
     this.url = url;
     this.iframe.src = await get_frame_bundle();
-    let html = await libcurl.fetch(url);
 
     await new Promise((resolve) => {
-      iframe.onload = () => {
-        this.send_page({
+      this.iframe.onload = async () => {
+        let response = await libcurl.fetch(url);
+        let html = await response.text();
+        await this.send_page({
           url: this.url,
           html: html
-        }).then(resolve);
+        });
+        resolve();
       }
     });
   }
-}
-
-export async function create_iframe() {
-  let iframe = document.createElement("iframe");
-  let frame_id = Math.random()+"";
-  iframe.sandbox = "allow-scripts";
-  iframe.setAttribute("frame-id", frame_id);
-  iframes[frame_id] = iframe;
-  return iframe;
 }

@@ -9,9 +9,7 @@ rpc_handlers["fetch"] = function() {
   return libcurl.fetch(...arguments);
 }
 
-document.addEventListener("load", () => {
-  libcurl.onload = () => {
-    console.log(`libcurl.js v${libcurl.version.lib} loaded`);
-  };
-  window.libcurl = libcurl;
-});
+libcurl.onload = () => {
+  console.log(`libcurl.js v${libcurl.version.lib} loaded`);
+};
+window.libcurl = libcurl;
