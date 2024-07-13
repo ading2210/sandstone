@@ -1,0 +1,16 @@
+{
+  "name": "proxy-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@mercuryworkshop/wisp-js": "github:MercuryWorkshop/wisp-client-js#rewrite",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  },
+  "author": "ading2210",
+  "license": "AGPL-3.0-only"
+}

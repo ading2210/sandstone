@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>proxy test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        margin: 0px;
+      }
+      #address_bar {
+        width: 100%;
+        display: flex;
+      }
+      #url_box {
+        flex-grow: 1;
+      }
+    </style>
+    <script src="/dist/host.js"></script>
+    <script src="/main.js"></script>
+  </head>
+  <body>
+    <div id="address_bar">
+      <input id="url_box" type="text" placeholder="Enter URL here..." value="https://ading.dev/">
+      <button id="navigate_button">Submit</button>
+    </div>
+    <div id="frame_container"></div>
+  </body>
+</html>

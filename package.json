@@ -1,0 +1,17 @@
+{
+  "name": "newproxy",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.mjs",
+  "scripts": {
+    "dev": "webpack --watch"
+  },
+  "author": "ading2210",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "libcurl.js": "^0.6.8"
+  },
+  "devDependencies": {
+    "webpack": "^5.92.1"
+  }
+}
