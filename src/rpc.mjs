@@ -73,7 +73,7 @@ export async function call_procedure(target, procedure, args) {
 
 export function create_rpc_wrapper(target, procedure) {
   return function(){
-    call_procedure(target, procedure, [...arguments]);
+    return call_procedure(target, procedure, [...arguments]);
   }
 }
 

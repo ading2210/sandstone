@@ -1,1 +1,2 @@
-import * as loader from "./loader.mjs";
+export * as loader from "./loader.mjs";
+export * as network from "./network.mjs";

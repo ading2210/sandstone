@@ -5,8 +5,22 @@ export function set_websocket(url) {
   libcurl.set_websocket(url);
 }
 
-rpc_handlers["fetch"] = function() {
-  return libcurl.fetch(...arguments);
+rpc_handlers["fetch"] = async function(url, options) {
+  let response = await libcurl.fetch(url, options);
+  let keys = ["ok", "redirected", "status", "statusText", "type", "url", "raw_headers"];
+  let payload = {
+    body: await response.blob(),
+    headers: [],
+    items: {}
+  };
+  for (let key of keys) {
+    payload.items[key] = response[key];
+  }
+  for (let pair of response.headers.entries()) {
+    payload.headers.push(pair);
+  }
+
+  return payload
 }
 
 libcurl.onload = () => {
