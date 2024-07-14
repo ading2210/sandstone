@@ -16,11 +16,13 @@ async function load_html(options) {
   
   //these run synchronously
   rewrite.anchor(html);
+  rewrite.link(html);
   
   //run the async ones in parallel
   await Promise.allSettled([
     rewrite.css(html),
-    rewrite.style(html)
+    rewrite.style(html),
+    rewrite.media(html)
   ]);
 
   //apply the rewritten html

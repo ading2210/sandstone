@@ -43,6 +43,7 @@ async function message_listener(event) {
 
   if (msg.type === "procedure") {
     let output = await handle_procedure_call(msg);
+    if (!event.source) return;
     if (output) {
       event.source.postMessage(output, "*");
     }

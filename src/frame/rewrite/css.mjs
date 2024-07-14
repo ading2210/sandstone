@@ -85,7 +85,7 @@ export async function rewrite_styles(html) {
     let element = inline_styles[i]; 
     let css = element.getAttribute("style");
     style_promises.push((async () => {
-      css = await parse_css(css, target_url);
+      css = await parse_css(css, ctx.location.href);
       element.setAttribute("style", css);
     })());
   }

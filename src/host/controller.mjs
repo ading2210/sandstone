@@ -5,29 +5,29 @@ import { libcurl } from "libcurl.js/bundled";
 
 import frame_js from "../../dist/frame.js";
 let frame_url = null;
+let frame_html = `
+  <!DOCTYPE html>
+  <head>
+    <script>${frame_js}</script>
+    <style>
+      html {
+        background-color: #222222;
+        font-family: sans-serif;
+      }
+      p {
+        color: #dddddd;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Loading...</p>
+  </body>
+`;
 
 export const iframes = {};
 
 function get_frame_bundle() {
   if (!frame_url) {
-    let frame_html = `
-      <!DOCTYPE html>
-      <head>
-        <script>${frame_js}</script>
-        <style>
-          html {
-            background-color: #222222;
-            font-family: sans-serif;
-          }
-          p {
-            color: #dddddd;
-          }
-        </style>
-      </head>
-      <body>
-        <p>Loading...</p>
-      </body>
-    `;
     let frame_blob = new Blob([frame_html], {type: "text/html"});
     frame_url = URL.createObjectURL(frame_blob);
   }
@@ -54,7 +54,8 @@ export class ProxyFrame {
 
     console.log("navigating to", url);
     this.url = url;
-    this.iframe.src = await get_frame_bundle();
+    this.iframe.style.backgroundColor = "#222222";
+    this.iframe.src = get_frame_bundle();
 
     let wait_for_load = () => {
       new Promise((resolve) => {
@@ -78,6 +79,7 @@ export class ProxyFrame {
       html: html, 
       frame_id: this.id
     });
+    this.iframe.style.backgroundColor = "unset";
   }
 }
 
