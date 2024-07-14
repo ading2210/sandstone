@@ -66,16 +66,16 @@ export class ProxyFrame {
     }
     let download_html = async () => {
       let response = await libcurl.fetch(url);
-      return await response.text();
+      return [await response.text(), response.url];
     }
 
-    let html = (await Promise.all([
+    let [html, final_url] = (await Promise.all([
       wait_for_load(),
       download_html()
     ]))[1];
 
     await this.send_page({
-      url: this.url,
+      url: final_url,
       html: html, 
       frame_id: this.id
     });

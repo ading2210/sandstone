@@ -3,6 +3,9 @@ import * as rpc from "../rpc.mjs";
 export const rpc_fetch = rpc.create_rpc_wrapper(parent, "fetch");
 
 export async function fetch(url, options) {
+  if (url.startsWith("data:") || url.startsWith("blob:")) {
+    return await fetch(url, options);
+  }
   let fetch_data = await rpc_fetch(url, options);
   let response = new Response(fetch_data.body);
   for (let key in fetch_data.items) {

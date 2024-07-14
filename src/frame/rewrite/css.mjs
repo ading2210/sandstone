@@ -1,5 +1,6 @@
+import * as util from "../../util.mjs";
 import * as network from "../network.mjs";
-import { ctx, convert_url } from "../ctx.mjs";
+import { ctx, convert_url } from "../context.mjs";
 
 //css @import not supported yet
 async function parse_css(css_str, css_url) {
@@ -25,7 +26,8 @@ async function parse_css(css_str, css_url) {
     })();
   }
 
-  let url_contents = await Promise.all(Object.values(requests));
+  let url_contents = await util.run_parallel(Object.values(requests));
+  url_contents.filter(item => item); //some requests may have failed
   let blobs = Object.fromEntries(url_contents);
 
   let count = 0;
@@ -65,7 +67,7 @@ export async function rewrite_css(html) {
     })());
   }
 
-  await Promise.allSettled(requests);
+  await util.run_parallel(requests);
 }
 
 export async function rewrite_styles(html) {
@@ -74,9 +76,9 @@ export async function rewrite_styles(html) {
   
   for (let i = 0; i < style_elements.length; i++) {
     let style_element = style_elements[i]; 
-    let css = style_element.innerText;
+    let css = style_element.innerHTML;
     style_promises.push((async () => {
-      style_element.innerText = await parse_css(css, ctx.location.href);
+      style_element.innerHTML = await parse_css(css, ctx.location.href);
     })());
   }
 
@@ -90,5 +92,5 @@ export async function rewrite_styles(html) {
     })());
   }
 
-  await Promise.allSettled(style_promises);
+  await util.run_parallel(style_promises);
 }

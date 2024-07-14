@@ -1,4 +1,4 @@
-import { ctx, convert_url } from "../ctx.mjs";
+import { ctx, convert_url } from "../context.mjs";
 import * as network from "../network.mjs";
 
 export function rewrite_media(html) {
@@ -13,7 +13,7 @@ export function rewrite_media(html) {
       continue;
     }
 
-    if (!media_src) {
+    if (!media_src || media_src.startsWith("data:")) {
       continue;
     }
 

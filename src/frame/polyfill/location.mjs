@@ -14,7 +14,7 @@ export class FakeLocation {
           return internal[key];
         },
         set: (value) => {
-          if (key !== "href") {
+          if (key === "href") {
             this.assign(value);
             return;
           }
@@ -27,6 +27,6 @@ export class FakeLocation {
 
   assign(url) {
     internal = new URL(url, internal);
-    loader.navigate(url);
+    loader.navigate(loader.frame_id, internal.href);
   }
 }

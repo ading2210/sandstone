@@ -85,7 +85,3 @@ export function set_role(value) {
 }
 
 window.addEventListener("message", message_listener);
-
-rpc_handlers["fetch"] = async (url, options) => {
-  return await fetch(url, options);
-};

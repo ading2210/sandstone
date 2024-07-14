@@ -1,4 +1,4 @@
-import { ctx, convert_url } from "../ctx.mjs";
+import { ctx, convert_url } from "../context.mjs";
 import * as loader from "../loader.mjs";
 
 export function rewrite_anchor(html) {
