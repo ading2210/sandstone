@@ -6,19 +6,19 @@ const internal = {
   globalThis: null
 };
 
-class CustomCTX extends EventTarget {
-  set location(value) {
-    this.location.href = "" + value;
-  }
-  get location() {
-    return internal.location;
-  }
+class CustomCTX {
+  set location(value) {this.location.assign(value)}
+  get location() {return internal.location}
 
   set self(value) {internal.self = value}
   get self() {return internal.self}
   set globalThis(value) {internal.globalThis = value}
   get globalThis() {return internal.globalThis}
+
   get window() {return this}
+  get origin() {return this.location.origin}
+
+  fetch() {return polyfill.fetch(...arguments)}
 }
 
 export const ctx = new CustomCTX();
@@ -40,24 +40,30 @@ export function update_ctx() {
   internal.self = ctx;
   internal.globalThis = ctx;
 
+  //wrap function calls
   let ctx_proto = Object.getPrototypeOf(ctx);
-  //let exclude_list = ["setTimeout", "setInterval", "clearTimeout", "clearInterval"];
-
-  for (let key of Reflect.ownKeys(window)) {
+  let window_keys = Reflect.ownKeys(window).concat(Object.keys(EventTarget.prototype));
+  for (let key of window_keys) {
     if (ctx_proto.hasOwnProperty(key)) continue;
-    //if (exclude_list.includes(key)) continue;
-
     try {
       if (typeof window[key] === "function") {
         wrap_function(key);
         continue;
       }
-
       ctx[key] = window[key];
     }
     catch (e) {
       console.error(key, e);
     }
+  }
+
+  //wrap window events
+  for (let key of Reflect.ownKeys(window)) {
+    if (!key.startsWith("on")) continue;
+    Object.defineProperty(ctx, key, {
+      get: () => {return window[key]},
+      set: (value) => {window[key] = value}
+    });
   }
 }
 

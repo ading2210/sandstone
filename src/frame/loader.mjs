@@ -22,7 +22,6 @@ function evaluate_scripts() {
     }
     else if (should_load(script_element)) {
       script_strings.push(script_element.innerHTML);
-      console.log(script_element);
     }
   }
 
@@ -68,6 +67,11 @@ async function load_html(options) {
   //apply the rewritten html
   document.documentElement.replaceWith(html.documentElement);
   evaluate_scripts();
+
+  //trigger load events
+  ctx.document.dispatchEvent(new Event("DOMContentLoaded"));
+  ctx.document.dispatchEvent(new Event("load"));
+  ctx.dispatchEvent(new Event("load"));
 }
 
 rpc.rpc_handlers["html"] = load_html;

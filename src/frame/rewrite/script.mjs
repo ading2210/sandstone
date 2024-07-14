@@ -31,7 +31,6 @@ export async function rewrite_scripts(html) {
 
         script_element.setAttribute("__src", script_element.src);
         script_element.setAttribute("__script_id", script_id);
-        script_element.removeAttribute("src");
       })());
     }
   }

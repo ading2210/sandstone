@@ -1,12 +1,20 @@
 import * as rpc from "../rpc.mjs";
+import * as loader from "./loader.mjs";
+import { ctx } from "./context.mjs";
 
 export const rpc_fetch = rpc.create_rpc_wrapper(parent, "fetch");
 
 export async function fetch(url, options) {
-  if (url.startsWith("data:") || url.startsWith("blob:")) {
-    return await fetch(url, options);
+  let base_url = ctx.location?.href || loader.url;
+  url = new URL(url, base_url);
+  if (url.protocol === "data:" || url.protocol === "blob:") {
+    return await fetch(url.href, options);
   }
-  let fetch_data = await rpc_fetch(url, options);
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw TypeError("Invalid URL");
+  }
+
+  let fetch_data = await rpc_fetch(url.href, options);
   let response = new Response(fetch_data.body);
   for (let key in fetch_data.items) {
     Object.defineProperty(response, key, {
