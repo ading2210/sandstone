@@ -11,7 +11,7 @@ body {
 
 #address_bar {
   display: flex;
-  height: 20px;
+  height: 26px;
 }
 
 #url_box {
@@ -26,4 +26,10 @@ body {
   width: 100%;
   height: 100%;
   border-width: 0px;
+}
+
+#favicon_container {
+  width: 24px;
+  text-align: center;
+  border: 1px solid black;
 }

@@ -1,6 +1,7 @@
 import * as rpc from "../rpc.mjs";
 import * as util from "../util.mjs";
 import * as rewrite from "./rewrite/index.mjs";
+import * as network from "./network.mjs";
 import { update_ctx, run_script, ctx } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
@@ -74,4 +75,21 @@ async function load_html(options) {
   ctx.dispatchEvent(new Event("load"));
 }
 
+async function get_favicon() {
+  var favicon_url = "/favicon.ico";
+  var link_elements = document.getElementsByTagName("link");
+  for (var i = 0; i < link_elements.length; i++) {
+    let link = link_elements[i];
+    if (link.getAttribute("rel") === "icon") 
+      favicon_url = link.getAttribute("href");
+    if (link.getAttribute("rel") === "shortcut icon") 
+      favicon_url = link.getAttribute("href");
+  }
+
+  let response = await network.fetch(favicon_url);
+  if (!response.ok) return null;
+  return await response.blob();
+}
+
 rpc.rpc_handlers["html"] = load_html;
+rpc.rpc_handlers["favicon"] = get_favicon;

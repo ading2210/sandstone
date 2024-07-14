@@ -39,12 +39,15 @@ export class ProxyFrame {
     this.url = null;
     this.id = Math.random() + "";
     this.iframe = document.createElement("iframe");
-    
     this.iframe.sandbox = "allow-scripts";
     this.iframe.setAttribute("frame-id", this.id);
-    this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
 
     iframes[this.id] = this;
+    this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
+    this.get_favicon = rpc.create_rpc_wrapper(this.iframe, "favicon");
+
+    this.on_navigate = () => {};
+    this.on_load = () => {};
   }
 
   async navigate_to(url) {
@@ -55,6 +58,7 @@ export class ProxyFrame {
     console.log("navigating to", url);
     this.url = url;
     this.iframe.style.backgroundColor = "#222222";
+    this.on_navigate();
     this.iframe.src = get_frame_bundle();
 
     let wait_for_load = () => {
@@ -80,6 +84,7 @@ export class ProxyFrame {
       frame_id: this.id
     });
     this.iframe.style.backgroundColor = "unset";
+    this.on_load();
   }
 }
 
