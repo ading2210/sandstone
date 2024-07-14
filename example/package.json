@@ -7,7 +7,7 @@
     "start": "node server.mjs"
   },
   "dependencies": {
-    "@mercuryworkshop/wisp-js": "github:MercuryWorkshop/wisp-client-js#rewrite",
+    "@mercuryworkshop/wisp-js": "^0.1.0",
     "express": "^4.19.2",
     "morgan": "^1.10.0"
   },

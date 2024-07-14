@@ -37,6 +37,7 @@ function handle_procedure_reply(msg) {
 
 async function message_listener(event) {
   let msg = event.data;
+  if (typeof msg.type === "undefined") return;
   console.log("got", msg);
 
   if (msg.type === "procedure") {
