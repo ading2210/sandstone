@@ -1,0 +1,1 @@
+export { FakeLocation } from "./location.mjs";

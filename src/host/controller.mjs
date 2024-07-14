@@ -43,6 +43,8 @@ export class ProxyFrame {
     this.iframe.sandbox = "allow-scripts";
     this.iframe.setAttribute("frame-id", this.id);
     this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
+
+    iframes[this.id] = this;
   }
 
   async navigate_to(url) {
@@ -73,7 +75,15 @@ export class ProxyFrame {
 
     await this.send_page({
       url: this.url,
-      html: html
+      html: html, 
+      frame_id: this.id
     });
   }
+}
+
+rpc.rpc_handlers["navigate"] = async (frame_id, url) => {
+  let frame = iframes[frame_id];
+  if (!frame) return;
+
+  await frame.navigate_to(url);
 }
