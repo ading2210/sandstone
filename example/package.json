@@ -7,7 +7,7 @@
     "start": "node server.mjs"
   },
   "dependencies": {
-    "@mercuryworkshop/wisp-js": "^0.1.0",
+    "@mercuryworkshop/wisp-js": "^0.1.1",
     "express": "^4.19.2",
     "morgan": "^1.10.0"
   },

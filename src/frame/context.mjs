@@ -3,11 +3,12 @@ import * as polyfill from "./polyfill/index.mjs";
 const internal = {
   location: null,
   self: null,
-  globalThis: null
+  globalThis: null,
+  eval: null
 };
 
 class CustomCTX {
-  set location(value) {this.location.assign(value)}
+  set location(value) {internal.location.assign(value)}
   get location() {return internal.location}
 
   set self(value) {internal.self = value}
@@ -23,16 +24,51 @@ class CustomCTX {
 
 export const ctx = new CustomCTX();
 
-function wrap_function(key) {
-  let target = window[key];
+export function wrap_function(key, wrapper, target) {
+  wrapper[key] = new Proxy(target[key], {
+    apply: function(target, this_arg, arguments_list) {
+      return Reflect.apply(target, window, arguments_list);
+    }
+  });
+  /*
   let hidden_sym = Symbol();
-  ctx[key] = function() {
-    if (this && this[hidden_sym]) return new target(...arguments);
-    return target(...arguments);
+  let func = target[key];
+  wrapper[key] = function() {
+    if (this && this[hidden_sym]) return new func(...arguments);
+    return func(...arguments);
   }
-  Object.setPrototypeOf(ctx[key], target);
-  if (target.prototype) ctx[key].prototype = target.prototype;
-  ctx[key].prototype[hidden_sym] = true; 
+  Object.setPrototypeOf(wrapper[key], func);
+  if (func.prototype) wrapper[key].prototype = func.prototype;
+  wrapper[key].prototype[hidden_sym] = true; 
+  */
+}
+
+export function wrap_obj(wrapper, target) {
+  let wrapper_proto = Object.getPrototypeOf(wrapper);
+  let target_keys = Reflect.ownKeys(target);
+  let target_proto = Object.getPrototypeOf(target);
+  while (target_proto != null) {
+    target_keys.push(...Reflect.ownKeys(target_proto));
+    target_proto = Object.getPrototypeOf(target_proto);
+  }
+
+  let exclude = ["RegExp", "eval"];
+  for (let key of target_keys) {
+    if (wrapper_proto.hasOwnProperty(key)) continue;
+    if (key === "__proto__") continue;
+    if (exclude.includes(key)) continue;
+    try {
+      if (typeof target[key] === "function") {
+        wrap_function(key, wrapper, target);
+        continue;
+      }
+      wrapper[key] = target[key];
+    }
+    catch (e) {
+      if (e instanceof DOMException) continue;
+      console.error(key, e);
+    }
+  }
 }
 
 export function update_ctx() {
@@ -41,21 +77,8 @@ export function update_ctx() {
   internal.globalThis = ctx;
 
   //wrap function calls
-  let ctx_proto = Object.getPrototypeOf(ctx);
-  let window_keys = Reflect.ownKeys(window).concat(Object.keys(EventTarget.prototype));
-  for (let key of window_keys) {
-    if (ctx_proto.hasOwnProperty(key)) continue;
-    try {
-      if (typeof window[key] === "function") {
-        wrap_function(key);
-        continue;
-      }
-      ctx[key] = window[key];
-    }
-    catch (e) {
-      console.error(key, e);
-    }
-  }
+  wrap_obj(ctx, window);
+  delete ctx.eval;
 
   //wrap window events
   for (let key of Reflect.ownKeys(window)) {
@@ -65,6 +88,17 @@ export function update_ctx() {
       set: (value) => {window[key] = value}
     });
   }
+
+  Object.defineProperty(Object.getPrototypeOf(document), "cookie", {
+    get: () => {return ""},
+    set: (value) => {}
+  });
+  Object.defineProperty(Object.getPrototypeOf(document), "URL", {
+    get: () => {return ctx.location.href},
+  });
+  Object.defineProperty(Object.getPrototypeOf(document), "baseURI", {
+    get: () => {return ctx.location.href},
+  });
 }
 
 export function convert_url(url, base) {

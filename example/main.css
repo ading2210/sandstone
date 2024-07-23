@@ -13,6 +13,9 @@ body {
   display: flex;
   height: 26px;
 }
+#address_bar * {
+  border-radius: 1px;
+}
 
 #url_box {
   flex-grow: 1;

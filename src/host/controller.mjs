@@ -78,8 +78,9 @@ export class ProxyFrame {
       download_html()
     ]))[1];
 
+    this.url = final_url
     await this.send_page({
-      url: final_url,
+      url: this.url,
       html: html, 
       frame_id: this.id
     });

@@ -15,6 +15,7 @@ main_frame.on_navigate = () => {
 }
 
 main_frame.on_load = async () => {
+  url_box.value = main_frame.url;
   let favicon = await main_frame.get_favicon();
   if (favicon === null) return;
   favicon_img.src = URL.createObjectURL(favicon);
@@ -36,6 +37,10 @@ function main() {
     }
   }
   frame_container.append(main_frame.iframe);
+
+  document.addEventListener("libcurl_load", async () => {
+    setTimeout(navigate_clicked, 1);
+  })
 }
 
 main();

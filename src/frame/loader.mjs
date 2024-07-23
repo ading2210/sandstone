@@ -26,6 +26,22 @@ function evaluate_scripts() {
     }
   }
 
+  
+  let wrapped_scripts = [];
+  for (let script of script_strings) {
+    wrapped_scripts.push(`
+      try {
+        ${script}
+      }
+      catch (__e__) {
+        console.error(__e__);
+      }
+    `)
+  }
+  run_script(wrapped_scripts.join("\n\n"));
+  
+  
+  /*
   for (let script of script_strings) {
     try {
       run_script(script);
@@ -34,6 +50,7 @@ function evaluate_scripts() {
       console.error(e);
     }
   }
+  */
 }
 
 async function load_html(options) {
