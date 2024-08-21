@@ -1,4 +1,5 @@
 import * as polyfill from "./polyfill/index.mjs";
+import * as intercept from "./intercept/index.mjs";
 
 const internal = {
   location: null,
@@ -6,6 +7,30 @@ const internal = {
   globalThis: null,
   eval: null
 };
+
+/*
+export const ctx = new Proxy(window, {
+  get(target, property) {
+    if (property === "location")
+      return internal.location;
+    else if (property === "self")
+      return internal.self;
+    else if (property === "globalThis")
+      return internal.globalThis;
+    else if (property === "window")
+      return ctx;
+    else if (property === "location")
+      return ctx.location;
+    else if (property === "origin") 
+      return ctx.location.origin
+
+    return Reflect.get(target, property);
+  },
+
+  set(target, property, value) {
+
+  }
+})*/
 
 class CustomCTX {
   set location(value) {internal.location.assign(value)}
@@ -18,6 +43,7 @@ class CustomCTX {
 
   get window() {return this}
   get origin() {return this.location.origin}
+  get document() {return intercept.document} 
 
   fetch() {return polyfill.fetch(...arguments)}
 }
@@ -26,8 +52,8 @@ export const ctx = new CustomCTX();
 
 export function wrap_function(key, wrapper, target) {
   wrapper[key] = new Proxy(target[key], {
-    apply: function(target, this_arg, arguments_list) {
-      return Reflect.apply(target, window, arguments_list);
+    apply: function(func_target, this_arg, arguments_list) {
+      return Reflect.apply(func_target, target, arguments_list);
     }
   });
   /*
@@ -44,6 +70,7 @@ export function wrap_function(key, wrapper, target) {
 }
 
 export function wrap_obj(wrapper, target) {
+  console.log(wrapper, target); 
   let wrapper_proto = Object.getPrototypeOf(wrapper);
   let target_keys = Reflect.ownKeys(target);
   let target_proto = Object.getPrototypeOf(target);
@@ -88,17 +115,6 @@ export function update_ctx() {
       set: (value) => {window[key] = value}
     });
   }
-
-  Object.defineProperty(Object.getPrototypeOf(document), "cookie", {
-    get: () => {return ""},
-    set: (value) => {}
-  });
-  Object.defineProperty(Object.getPrototypeOf(document), "URL", {
-    get: () => {return ctx.location.href},
-  });
-  Object.defineProperty(Object.getPrototypeOf(document), "baseURI", {
-    get: () => {return ctx.location.href},
-  });
 }
 
 export function convert_url(url, base) {

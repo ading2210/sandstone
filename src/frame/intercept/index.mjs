@@ -1,0 +1,1 @@
+export { custom_document as document } from "./document.mjs";
