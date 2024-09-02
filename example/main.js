@@ -28,8 +28,11 @@ async function navigate_clicked() {
 }
 
 function main() {
-  libcurl.set_websocket(location.href.replace("http", "ws"));
-
+  if (location.protocol === "file:") 
+    libcurl.set_websocket("wss://wisp.mercurywork.shop/");
+  else 
+    libcurl.set_websocket(location.href.replace("http", "ws"));
+  
   navigate_button.onclick = navigate_clicked;
   url_box.onkeydown = (event) => {
     if (event.code === "Enter") {

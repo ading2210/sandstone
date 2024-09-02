@@ -10,7 +10,7 @@
   "author": "ading2210",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "libcurl.js": "^0.6.10"
+    "libcurl.js": "^0.6.13"
   },
   "devDependencies": {
     "webpack": "^5.92.1"

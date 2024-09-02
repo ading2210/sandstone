@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "build": "npx inline-script-tags index.html bundled.html; npx inline-stylesheets bundled.html ."
   },
   "dependencies": {
     "@mercuryworkshop/wisp-js": "^0.1.1",
@@ -12,5 +13,8 @@
     "morgan": "^1.10.0"
   },
   "author": "ading2210",
-  "license": "AGPL-3.0-only"
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "inline-scripts": "^1.7.4"
+  }
 }
