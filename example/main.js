@@ -27,11 +27,11 @@ async function navigate_clicked() {
   await main_frame.navigate_to(url_box.value);
 }
 
-function main() {
+async function main() {
   if (location.protocol === "file:") 
-    libcurl.set_websocket("wss://wisp.mercurywork.shop/");
+    proxy_host.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
   else 
-    libcurl.set_websocket(location.href.replace("http", "ws"));
+    proxy_host.libcurl.set_websocket(location.href.replace("http", "ws"));
   
   navigate_button.onclick = navigate_clicked;
   url_box.onkeydown = (event) => {
@@ -40,10 +40,7 @@ function main() {
     }
   }
   frame_container.append(main_frame.iframe);
-
-  document.addEventListener("libcurl_load", async () => {
-    setTimeout(navigate_clicked, 1);
-  })
+  await navigate_clicked();
 }
 
 main();

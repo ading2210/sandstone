@@ -50,7 +50,13 @@ export class ProxyFrame {
     this.on_load = () => {};
   }
 
+  async wait_for_libcurl() {
+    if (libcurl.ready) return;
+    await libcurl.load_wasm();
+  }
+
   async navigate_to(url) {
+    await this.wait_for_libcurl();
     if (!util.is_valid_url(url)) {
       throw TypeError("Invalid URL");
     }

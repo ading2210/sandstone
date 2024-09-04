@@ -23,7 +23,6 @@ rpc_handlers["fetch"] = async function(url, options) {
   return payload
 }
 
-libcurl.onload = () => {
+libcurl.events.addEventListener("libcurl_load", () => {
   console.log(`libcurl.js v${libcurl.version.lib} loaded`);
-};
-window.libcurl = libcurl;
+});
