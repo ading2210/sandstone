@@ -1,36 +1,13 @@
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 
+const is_worker = typeof importScripts === "function";
 const internal = {
   location: null,
   self: null,
   globalThis: null,
   eval: null
 };
-
-/*
-export const ctx = new Proxy(window, {
-  get(target, property) {
-    if (property === "location")
-      return internal.location;
-    else if (property === "self")
-      return internal.self;
-    else if (property === "globalThis")
-      return internal.globalThis;
-    else if (property === "window")
-      return ctx;
-    else if (property === "location")
-      return ctx.location;
-    else if (property === "origin") 
-      return ctx.location.origin
-
-    return Reflect.get(target, property);
-  },
-
-  set(target, property, value) {
-
-  }
-})*/
 
 class CustomCTX {
   set location(value) {internal.location.assign(value)}
@@ -43,10 +20,11 @@ class CustomCTX {
 
   get window() {return this}
   get origin() {return this.location.origin}
-  get document() {return intercept.document} 
+  get document() {return is_worker ? undefined : intercept.document} 
 
   fetch() {return polyfill.fetch(...arguments)}
   get URL() {return polyfill.FakeURL}
+  get Worker() {return polyfill.FakeWorker}
 }
 
 export const ctx = new CustomCTX();
@@ -91,11 +69,20 @@ export function wrap_obj(wrapper, target) {
         wrap_function(key, wrapper, target);
         continue;
       }
-      wrapper[key] = target[key];
+      try {
+        wrapper[key] = target[key];
+      }
+      catch {
+        Object.defineProperty(wrapper, key, {
+          configurable: true,
+          value: target[key],
+          writable: true
+        })
+      }
     }
     catch (e) {
       if (e instanceof DOMException) continue;
-      console.error(key, e);
+      if (e instanceof TypeError) continue;
     }
   }
 }

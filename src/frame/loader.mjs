@@ -7,8 +7,9 @@ import { update_ctx, run_script, ctx } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(parent, "navigate");
-export let url;
-export let frame_id;
+export const runtime_src = document.currentScript.innerHTML;
+export let url; //the proxied page url
+export let frame_id; //the current frame id
 
 function evaluate_scripts() {
   let script_elements = document.getElementsByTagName("script");
@@ -40,18 +41,6 @@ function evaluate_scripts() {
     `)
   }
   run_script(wrapped_scripts.join("\n\n"));
-  
-  
-  /*
-  for (let script of script_strings) {
-    try {
-      run_script(script);
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-  */
 }
 
 async function load_html(options) {

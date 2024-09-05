@@ -1,26 +1,17 @@
-import { wrap_obj } from "../context.mjs";
+import { ctx, wrap_obj } from "../context.mjs";
 
-/*
-export const document_proxy = new Proxy(document, {
-  get(target, property) {
-    if (property === "location")
-      return ctx.location;
-    if (property === "URL")
-      return ctx.location.href;
-    if (property === "baseURL")
-      return ctx.location.href;
-    if (property === "cookie")
-      return "";
-    
-    return Reflect.get(target, property);
-  }
-})
-*/
 
 
 class CustomDocument {
   get cookie() {return ""}
   get body() {return this.__target__.body}
+  get location() {return ctx.location}
+  get URL() {return ctx.URL}
+
+  createElement(tag_name, options) {
+    console.log("DEBUG document.createElement", tag_name, options);
+    return this.__target__.createElement(tag_name, options);
+  }
 }
 
 export const custom_document = new CustomDocument();
