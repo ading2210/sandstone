@@ -2,6 +2,7 @@ import * as rpc from "../rpc.mjs";
 import * as util from "../util.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
+
 import { update_ctx, run_script, ctx } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
@@ -56,6 +57,7 @@ function evaluate_scripts() {
 async function load_html(options) {
   url = options.url;
   frame_id = options.frame_id;
+  network.known_urls[location.href] = options.url;
   update_ctx();
 
   let parser = new DOMParser();

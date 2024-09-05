@@ -4,6 +4,8 @@ import { ctx } from "./context.mjs";
 
 export const rpc_fetch = rpc.create_rpc_wrapper(parent, "fetch");
 
+export const known_urls = {};
+
 export async function fetch(url, options) {
   let base_url = ctx.location?.href || loader.url;
   url = new URL(url, base_url);
@@ -32,3 +34,10 @@ export async function fetch(url, options) {
 
   return response;
 };
+
+export function create_blob_url(blob, target_url = null) {
+  let url = URL.createObjectURL(blob);
+  if (target_url)
+    known_urls[url] = target_url;
+  return url;
+}

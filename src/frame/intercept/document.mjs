@@ -1,4 +1,4 @@
-import { ctx, wrap_obj } from "../context.mjs";
+import { wrap_obj } from "../context.mjs";
 
 /*
 export const document_proxy = new Proxy(document, {
@@ -20,6 +20,7 @@ export const document_proxy = new Proxy(document, {
 
 class CustomDocument {
   get cookie() {return ""}
+  get body() {return this.__target__.body}
 }
 
 export const custom_document = new CustomDocument();

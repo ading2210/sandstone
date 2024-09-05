@@ -46,6 +46,7 @@ class CustomCTX {
   get document() {return intercept.document} 
 
   fetch() {return polyfill.fetch(...arguments)}
+  get URL() {return polyfill.FakeURL}
 }
 
 export const ctx = new CustomCTX();
@@ -70,6 +71,7 @@ export function wrap_function(key, wrapper, target) {
 }
 
 export function wrap_obj(wrapper, target) {
+  wrapper.__target__ = target;
   console.log(wrapper, target); 
   let wrapper_proto = Object.getPrototypeOf(wrapper);
   let target_keys = Reflect.ownKeys(target);
@@ -79,7 +81,7 @@ export function wrap_obj(wrapper, target) {
     target_proto = Object.getPrototypeOf(target_proto);
   }
 
-  let exclude = ["RegExp", "eval"];
+  let exclude = ["eval"];
   for (let key of target_keys) {
     if (wrapper_proto.hasOwnProperty(key)) continue;
     if (key === "__proto__") continue;

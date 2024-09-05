@@ -38,7 +38,7 @@ async function parse_css(css_str, css_url) {
       return original;
     }
     
-    let new_url = URL.createObjectURL(blobs[url]);
+    let new_url = network.create_blob_url(blobs[url], url);
     count++;
     return `url("${new_url}")`;
   });
@@ -62,7 +62,7 @@ export async function rewrite_css(html) {
       let css = await response.text();
       let new_css = await parse_css(css, css_url);
       let css_blob = new Blob([new_css], {type: "text/css"});
-      let blob_url = URL.createObjectURL(css_blob);
+      let blob_url = network.create_blob_url(css_blob, response.url);
       link_element.href = blob_url;
     })());
   }
