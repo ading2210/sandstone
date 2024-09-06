@@ -6,8 +6,8 @@ import * as network from "./network.mjs";
 import { update_ctx, run_script, ctx } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
-export const navigate = rpc.create_rpc_wrapper(parent, "navigate");
-export const runtime_src = document.currentScript.innerHTML;
+export const navigate = rpc.create_rpc_wrapper(rpc.parent, "navigate");
+export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
 export let frame_id; //the current frame id
 
@@ -43,10 +43,18 @@ function evaluate_scripts() {
   run_script(wrapped_scripts.join("\n\n"));
 }
 
+export function set_frame_id(id) {
+  frame_id = id;
+}
+export function set_url(_url) {
+  url = _url;
+}
+
 async function load_html(options) {
-  url = options.url;
-  frame_id = options.frame_id;
   network.known_urls[location.href] = options.url;
+  network.enable_network()
+  set_url(options.url);
+  set_frame_id(options.frame_id);
   update_ctx();
 
   let parser = new DOMParser();

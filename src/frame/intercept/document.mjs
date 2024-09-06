@@ -1,7 +1,5 @@
 import { ctx, wrap_obj } from "../context.mjs";
 
-
-
 class CustomDocument {
   get cookie() {return ""}
   get body() {return this.__target__.body}
@@ -15,4 +13,5 @@ class CustomDocument {
 }
 
 export const custom_document = new CustomDocument();
-wrap_obj(custom_document, document);
+if (typeof importScripts !== "function") 
+  wrap_obj(custom_document, document);

@@ -2,11 +2,23 @@ import * as rpc from "../rpc.mjs";
 import * as loader from "./loader.mjs";
 import { ctx } from "./context.mjs";
 
-export const rpc_fetch = rpc.create_rpc_wrapper(parent, "fetch");
+export const rpc_fetch = rpc.create_rpc_wrapper(rpc.parent, "fetch");
 
 export const known_urls = {};
+export const resource_cache = {};
+export let requests_allowed = false;
+
+export function enable_network(allowed=true) {
+  requests_allowed = allowed;
+}
+
+export function cache_put(url, data) {
+  resource_cache[url] = data; //put a blob into the cache
+}
 
 export async function fetch(url, options) {
+  if (!requests_allowed) throw "Network request blocked";
+
   let base_url = ctx.location?.href || loader.url;
   url = new URL(url, base_url);
   if (url.protocol === "data:" || url.protocol === "blob:") {

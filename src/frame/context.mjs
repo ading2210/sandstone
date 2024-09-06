@@ -1,7 +1,7 @@
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 
-const is_worker = typeof importScripts === "function";
+export const is_worker = typeof importScripts === "function";
 const internal = {
   location: null,
   self: null,
@@ -25,6 +25,7 @@ class CustomCTX {
   fetch() {return polyfill.fetch(...arguments)}
   get URL() {return polyfill.FakeURL}
   get Worker() {return polyfill.FakeWorker}
+  get importScripts() {return is_worker ? polyfill.fakeImportScripts : undefined}
 }
 
 export const ctx = new CustomCTX();
@@ -93,15 +94,15 @@ export function update_ctx() {
   internal.globalThis = ctx;
 
   //wrap function calls
-  wrap_obj(ctx, window);
+  wrap_obj(ctx, globalThis);
   delete ctx.eval;
 
   //wrap window events
-  for (let key of Reflect.ownKeys(window)) {
+  for (let key of Reflect.ownKeys(globalThis)) {
     if (!key.startsWith("on")) continue;
     Object.defineProperty(ctx, key, {
-      get: () => {return window[key]},
-      set: (value) => {window[key] = value}
+      get: () => {return globalThis[key]},
+      set: (value) => {globalThis[key] = value}
     });
   }
 }

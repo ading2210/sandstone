@@ -2,6 +2,8 @@ export let role = null;
 export const rpc_handlers = {};
 export const rpc_requests = {};
 
+export const parent = self.parent ? self.parent : self;
+
 async function handle_procedure_call(msg) {
   if (!rpc_handlers[msg.procedure]) {
     return;
@@ -39,7 +41,7 @@ function handle_procedure_reply(msg) {
 async function message_listener(event) {
   let msg = event.data;
   if (typeof msg.type === "undefined") return;
-  console.log(`${role} got`, msg);
+  console.log(`RPC ${role} got`, msg);
 
   if (msg.type === "procedure") {
     let output = await handle_procedure_call(msg);
@@ -69,7 +71,7 @@ export async function call_procedure(target, procedure, args) {
       if (reply.success) resolve(reply.value);
       else reject(reply.value);
     }
-    console.log(`${role} sending`, msg);
+    console.log(`RPC ${role} sending`, msg);
     target.postMessage(msg, "*");  
   });
 }
@@ -84,4 +86,4 @@ export function set_role(value) {
   role = value;
 }
 
-window.addEventListener("message", message_listener);
+self.addEventListener("message", message_listener);
