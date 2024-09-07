@@ -30,6 +30,11 @@ class CustomCTX {
 
 export const ctx = new CustomCTX();
 
+export function proxy_function(target, key, apply_callback) {
+  if (!target) return;
+  target[key] = new Proxy(target[key], {apply: apply_callback});
+}
+
 export function wrap_function(key, wrapper, target) {
   wrapper[key] = new Proxy(target[key], {
     apply: function(func_target, this_arg, arguments_list) {
@@ -110,6 +115,21 @@ export function update_ctx() {
 export function convert_url(url, base) {
   let url_obj = new URL(url, base);
   return url_obj.href;
+}
+
+export function safe_script_template(js) {
+  return `
+    try {
+      ${js}
+    }
+    catch (__e__) {
+      console.error(__e__);
+    }
+  `;
+}
+
+export function run_script_safe(js, this_arg=ctx) {
+  run_script(safe_script_template(js), this_arg);
 }
 
 export function run_script(js, this_obj=ctx) {
