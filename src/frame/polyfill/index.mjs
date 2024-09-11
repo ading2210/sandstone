@@ -3,3 +3,4 @@ export { FakeURL } from "./url.mjs";
 export { fakeImportScripts, FakeWorker } from "./worker.mjs";
 
 export { fetch } from "./fetch.mjs";
+export { FakeXMLHttpRequest } from "./xhr.mjs";

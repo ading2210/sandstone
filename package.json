@@ -5,12 +5,13 @@
   "main": "src/index.mjs",
   "scripts": {
     "build": "webpack",
+    "build:prod": "webpack --mode=production",
     "dev": "webpack --watch"
   },
   "author": "ading2210",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "libcurl.js": "^0.6.14"
+    "libcurl.js": "^0.6.15"
   },
   "devDependencies": {
     "webpack": "^5.94.0"

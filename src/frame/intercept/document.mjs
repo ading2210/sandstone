@@ -4,7 +4,7 @@ class CustomDocument {
   get cookie() {return ""}
   get body() {return this.__target__.body}
   get location() {return ctx.location}
-  get URL() {return ctx.URL}
+  get URL() {return ctx.location.href}
 
   createElement(tag_name, options) {
     console.log("DEBUG document.createElement", tag_name, options);

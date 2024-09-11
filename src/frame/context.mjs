@@ -26,6 +26,7 @@ class CustomCTX {
   get URL() {return polyfill.FakeURL}
   get Worker() {return polyfill.FakeWorker}
   get importScripts() {return is_worker ? polyfill.fakeImportScripts : undefined}
+  get XMLHttpRequest() {return polyfill.FakeXMLHttpRequest}
 }
 
 export const ctx = new CustomCTX();
