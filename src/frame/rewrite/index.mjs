@@ -4,3 +4,4 @@ export { rewrite_anchor as anchor } from "./anchor.mjs";
 export { rewrite_media as media } from "./media.mjs";
 export { rewrite_links as link } from "./link.mjs";
 export { rewrite_scripts as script } from "./script.mjs";
+export { rewrite_meta as meta } from "./meta.mjs";

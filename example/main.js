@@ -32,7 +32,7 @@ async function navigate_clicked() {
 }
 
 async function main() {
-  if (location.protocol === "file:") 
+  if (location.protocol !== "http:" && location.protocol !== "https:") 
     proxy_host.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
   else 
     proxy_host.libcurl.set_websocket(location.href.replace("http", "ws"));
