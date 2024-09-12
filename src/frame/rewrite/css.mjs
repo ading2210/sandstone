@@ -3,7 +3,7 @@ import * as network from "../network.mjs";
 import { ctx, convert_url } from "../context.mjs";
 
 //css @import not supported yet
-async function parse_css(css_str, css_url) {
+export async function parse_css(css_str, css_url) {
   let url_regex = /url\(['"]?(.+?)['"]?\)/gm;
   let matches = [...css_str.matchAll(url_regex)];
   if (!matches.length) {

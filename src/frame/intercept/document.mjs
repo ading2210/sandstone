@@ -1,4 +1,4 @@
-import { ctx, wrap_obj } from "../context.mjs";
+import { ctx } from "../context.mjs";
 
 class CustomDocument {
   get cookie() {return ""}
@@ -13,5 +13,3 @@ class CustomDocument {
 }
 
 export const custom_document = new CustomDocument();
-if (typeof importScripts !== "function") 
-  wrap_obj(custom_document, document);

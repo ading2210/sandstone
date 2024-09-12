@@ -48,6 +48,7 @@ export class ProxyFrame {
 
     this.on_navigate = () => {};
     this.on_load = () => {};
+    this.on_url_change = () => {};
   }
 
   async wait_for_libcurl() {
@@ -95,9 +96,15 @@ export class ProxyFrame {
   }
 }
 
-rpc.rpc_handlers["navigate"] = async (frame_id, url) => {
+rpc.rpc_handlers["navigate"] = async (frame_id, url, reload=true) => {
   let frame = iframes[frame_id];
   if (!frame) return;
 
-  await frame.navigate_to(url);
+  if (reload) {
+    await frame.navigate_to(url);
+  }
+  else {
+    frame.url = url;
+    frame.on_url_change();
+  }
 }

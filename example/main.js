@@ -23,6 +23,10 @@ main_frame.on_load = async () => {
   favicon_text.style.display = "none";  
 }
 
+main_frame.on_url_change = () => {
+  url_box.value = main_frame.url;
+}
+
 async function navigate_clicked() {
   await main_frame.navigate_to(url_box.value);
 }

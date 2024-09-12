@@ -3,7 +3,8 @@ import * as util from "../util.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
-import { update_ctx, run_script, ctx } from "./context.mjs";
+import { custom_document } from "./intercept/document.mjs";
+import { update_ctx, run_script, ctx, safe_script_template, wrap_obj } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(rpc.parent, "navigate");
@@ -31,14 +32,7 @@ function evaluate_scripts() {
   
   let wrapped_scripts = [];
   for (let script of script_strings) {
-    wrapped_scripts.push(`
-      try {
-        ${script}
-      }
-      catch (__e__) {
-        console.error(__e__);
-      }
-    `)
+    wrapped_scripts.push(safe_script_template(script));
   }
   run_script(wrapped_scripts.join("\n\n"));
 }
@@ -52,7 +46,7 @@ export function set_url(_url) {
 
 async function load_html(options) {
   network.known_urls[location.href] = options.url;
-  network.enable_network()
+  network.enable_network();
   set_url(options.url);
   set_frame_id(options.frame_id);
   update_ctx();
@@ -83,6 +77,7 @@ async function load_html(options) {
 
   //apply the rewritten html
   document.documentElement.replaceWith(html.documentElement);
+  wrap_obj(custom_document, document);
   evaluate_scripts();
 
   //trigger load events

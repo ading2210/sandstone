@@ -6,7 +6,8 @@ const internal = {
   location: null,
   self: null,
   globalThis: null,
-  eval: null
+  eval: null,
+  history: null
 };
 
 class CustomCTX {
@@ -27,6 +28,7 @@ class CustomCTX {
   get Worker() {return polyfill.FakeWorker}
   get importScripts() {return is_worker ? polyfill.fakeImportScripts : undefined}
   get XMLHttpRequest() {return polyfill.FakeXMLHttpRequest}
+  get history() {return internal.history}
 }
 
 export const ctx = new CustomCTX();
@@ -98,6 +100,7 @@ export function update_ctx() {
   internal.location = new polyfill.FakeLocation();
   internal.self = ctx;
   internal.globalThis = ctx;
+  internal.history = new polyfill.FakeHistory();
 
   //wrap function calls
   wrap_obj(ctx, globalThis);
