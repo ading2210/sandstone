@@ -5,3 +5,4 @@ export { rewrite_media as media } from "./media.mjs";
 export { rewrite_links as link } from "./link.mjs";
 export { rewrite_scripts as script } from "./script.mjs";
 export { rewrite_meta as meta } from "./meta.mjs";
+export { rewrite_noscript as noscript } from "./noscript.mjs";

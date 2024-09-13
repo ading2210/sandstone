@@ -11,8 +11,9 @@ export function rewrite_meta(html) {
     if (!content) continue;
 
     //regex that splits out time and url of the refresh header
-    let content_regex = /(\d+)([;,] url=['"]?(.+?)['"]?)?$/im;
-    let [match, timeout, _, url] = content.match(content_regex);
+    let content_regex = /(\d+)([;,] ?url=['"]?(.+?)['"]?)?$/im;
+    let matches = content.match(content_regex);
+    let [match, timeout, _, url] = matches;
     if (!timeout || !match) continue;
     if (!url) url = "/"
     

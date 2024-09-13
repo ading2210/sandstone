@@ -62,6 +62,7 @@ async function load_html(options) {
   let html = parser.parseFromString(options.html, "text/html");  
   
   //these run synchronously
+  rewrite.noscript(html);
   rewrite.anchor(html);
   rewrite.link(html);
   rewrite.meta(html);

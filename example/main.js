@@ -28,6 +28,8 @@ main_frame.on_url_change = () => {
 }
 
 async function navigate_clicked() {
+  if (!url_box.value.startsWith("http:") && !url_box.value.startsWith("https:")) 
+    url_box.value = "https://" + url_box.value;
   await main_frame.navigate_to(url_box.value);
 }
 
