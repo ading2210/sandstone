@@ -14,13 +14,22 @@ let frame_html = `
         background-color: #222222;
         font-family: sans-serif;
       }
-      p {
+      * {
         color: #dddddd;
+      }
+      #error_div {
+        display: none;
       }
     </style>
   </head>
   <body>
-    <p>Loading...</p>
+    <p id="loading_text">Loading...</p>
+
+    <div id="error_div">
+      <h2>An unexpected network error has occurred</h2>
+      <pre id="error_msg">
+      </pre>
+    </div>
   </body>
 `;
 
@@ -76,11 +85,21 @@ export class ProxyFrame {
       })
     }
     let download_html = async () => {
-      let response = await libcurl.fetch(url);
-      return [await response.text(), response.url];
+      try {
+        let response = await libcurl.fetch(url);
+        return [false, await response.text(), response.url];  
+      }
+      catch (error) {
+        let error_msg = error.stack;
+        if (!error.stack)
+          error_msg = new Error(error).stack;
+        if (!error_msg.includes(error))
+          error_msg = error + "\n\n" + error_msg;
+        return [error_msg, null, url];
+      }
     }
 
-    let [html, final_url] = (await Promise.all([
+    let [error, html, final_url] = (await Promise.all([
       wait_for_load(),
       download_html()
     ]))[1];
@@ -89,7 +108,8 @@ export class ProxyFrame {
     await this.send_page({
       url: this.url,
       html: html, 
-      frame_id: this.id
+      frame_id: this.id,
+      error: error
     });
     this.iframe.style.backgroundColor = "unset";
     this.on_load();

@@ -1,6 +1,6 @@
 import * as loader from "../loader.mjs";
 
-let internal = null;
+export let internal = null;
 
 export class FakeLocation {
   constructor() {

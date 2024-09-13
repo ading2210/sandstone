@@ -51,6 +51,13 @@ async function load_html(options) {
   set_frame_id(options.frame_id);
   update_ctx();
 
+  if (options.error) {
+    document.getElementById("loading_text").style.display = "none";
+    document.getElementById("error_div").style.display = "initial";
+    document.getElementById("error_msg").innerText = options.error;
+    return;
+  }
+
   let parser = new DOMParser();
   let html = parser.parseFromString(options.html, "text/html");  
   
