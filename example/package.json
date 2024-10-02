@@ -8,8 +8,8 @@
     "build": "npx inline-script-tags index.html bundled.html; npx inline-stylesheets bundled.html ."
   },
   "dependencies": {
-    "@mercuryworkshop/wisp-js": "^0.1.1",
-    "express": "^4.19.2",
+    "@mercuryworkshop/wisp-js": "^0.3.2",
+    "express": "^4.21.0",
     "morgan": "^1.10.0"
   },
   "author": "ading2210",

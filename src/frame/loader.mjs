@@ -11,6 +11,7 @@ export const navigate = rpc.create_rpc_wrapper(rpc.parent, "navigate");
 export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
 export let frame_id; //the current frame id
+export let is_loaded = false;
 
 function evaluate_scripts() {
   let script_elements = document.getElementsByTagName("script");
@@ -62,17 +63,17 @@ async function load_html(options) {
   let html = parser.parseFromString(options.html, "text/html");  
   
   //these run synchronously
-  rewrite.noscript(html);
-  rewrite.anchor(html);
-  rewrite.link(html);
-  rewrite.meta(html);
+  rewrite.all_noscript(html);
+  rewrite.all_anchor(html);
+  rewrite.all_links(html);
+  rewrite.all_meta(html);
+  rewrite.all_media(html);
   
   //run the async ones in parallel
   await util.run_parallel([
-    rewrite.css(html),
-    rewrite.style(html),
-    rewrite.media(html),
-    rewrite.script(html)
+    rewrite.all_stylesheets(html),
+    rewrite.all_styles(html),
+    rewrite.all_scripts(html)
   ]);
 
   //parse elements with ids and add them to the scope
@@ -90,6 +91,7 @@ async function load_html(options) {
   evaluate_scripts();
 
   //trigger load events
+  is_loaded = true;
   ctx.document.dispatchEvent(new Event("DOMContentLoaded"));
   ctx.document.dispatchEvent(new Event("load"));
   ctx.dispatchEvent(new Event("load"));

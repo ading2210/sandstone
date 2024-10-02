@@ -11,7 +11,7 @@
   "author": "ading2210",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "libcurl.js": "^0.6.15"
+    "libcurl.js": "^0.6.16"
   },
   "devDependencies": {
     "webpack": "^5.94.0"

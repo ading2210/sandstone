@@ -3,7 +3,6 @@ import { parse_css } from "../rewrite/css.mjs";
 import { ctx, proxy_function, run_script_safe, convert_url } from "../context.mjs";
 
 function handle_append_script(element) {
-  //console.log("DEBUG handle_append_script", element);
   if (element.src) {
     (async () => {
       let url = convert_url(element.src, ctx.location.href);
@@ -20,7 +19,6 @@ function handle_append_script(element) {
 }
 
 function handle_append_css(element) {
-  //console.log("DEBUG handle_append_css", element);
   if (element.href) {
     element.remove = () => {console.warn("DEBUG element.remove", element)};
     (async () => {
@@ -44,13 +42,11 @@ function handle_append(element) {
 }
 
 proxy_function(globalThis?.HTMLElement?.prototype, "append", (target, this_arg, args) => {
-  //console.log("DEBUG HTMLElement.prototype.append", target, this_arg, args);
   handle_append(args[0]);
   return Reflect.apply(target, this_arg, args);
 })
 
 proxy_function(globalThis?.HTMLElement?.prototype, "appendChild", (target, this_arg, args) => {
-  //console.log("DEBUG HTMLElement.prototype.appendChild", target, this_arg, args);
   handle_append(args[0]);
   return Reflect.apply(target, this_arg, args);
 })
