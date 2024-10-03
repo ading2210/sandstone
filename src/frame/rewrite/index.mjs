@@ -1,3 +1,5 @@
+export { rewrite_element } from "./element.mjs";
+
 //synchronous rewriter functions - may run in the background during load
 export { 
   rewrite_anchor as anchor,

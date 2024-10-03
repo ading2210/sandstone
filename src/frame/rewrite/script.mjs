@@ -1,7 +1,7 @@
 import * as util from "../../util.mjs";
 import * as network from "../network.mjs";
 import * as loader from "../loader.mjs";
-import { ctx, run_script, convert_url } from "../context.mjs";
+import { ctx, run_script, run_script_safe, convert_url } from "../context.mjs";
 
 export const pending_scripts = {};
 
@@ -27,7 +27,7 @@ export async function rewrite_script(script_element) {
 
   if (loader.is_loaded) {
     run_script_safe(script_text);
-    element.dispatchEvent(new Event("load"));
+    script_element.dispatchEvent(new Event("load"));
   }
   else {
     let script_id = "" + Math.random();

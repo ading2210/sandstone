@@ -1,44 +1,11 @@
-import * as network from "../network.mjs"; 
-import { parse_css } from "../rewrite/css.mjs";
-import { ctx, proxy_function, run_script_safe, convert_url } from "../context.mjs";
-
-function handle_append_script(element) {
-  if (element.src) {
-    (async () => {
-      let url = convert_url(element.src, ctx.location.href);
-      let response = await network.fetch(url);
-      let script_text = await response.text();
-      run_script_safe(script_text);
-      element.dispatchEvent(new Event("load"));
-    })();
-  }
-  else {
-    run_script_safe(element.innerHTML);
-    element.dispatchEvent(new Event("load"));
-  }
-}
-
-function handle_append_css(element) {
-  if (element.href) {
-    element.remove = () => {console.warn("DEBUG element.remove", element)};
-    (async () => {
-      let url = convert_url(element.href, ctx.location.href);
-      let response = await network.fetch(url);
-      let css_text = await response.text();
-      
-      let style = document.createElement("style");
-      style.innerHTML = await parse_css(css_text, url);
-      element.append(style);
-      element.dispatchEvent(new Event("load"));
-    })();
-  }
-}
+import * as rewrite from "../rewrite/index.mjs";
+import { proxy_function } from "../context.mjs";
 
 function handle_append(element) {
   if (element instanceof HTMLScriptElement) 
-    handle_append_script(element);
+    rewrite.script(element);
   else if (element instanceof HTMLLinkElement && element.rel.includes("stylesheet")) 
-    handle_append_css(element);
+    rewrite.stylesheet(element);
 }
 
 proxy_function(globalThis?.HTMLElement?.prototype, "append", (target, this_arg, args) => {
