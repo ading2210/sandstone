@@ -68,6 +68,7 @@ async function load_html(options) {
   rewrite.all_links(html);
   rewrite.all_meta(html);
   rewrite.all_media(html);
+  rewrite.all_forms(html);
   
   //run the async ones in parallel
   await util.run_parallel([

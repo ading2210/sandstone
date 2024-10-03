@@ -1,4 +1,4 @@
-export { rewrite_element } from "./element.mjs";
+export { rewrite_element as element } from "./element.mjs";
 
 //synchronous rewriter functions - may run in the background during load
 export { 
@@ -16,6 +16,9 @@ export {
 export { 
   rewrite_noscript as noscript,
   rewrite_all_noscript as all_noscript } from "./noscript.mjs";
+export { 
+  rewrite_form as form,
+  rewrite_all_forms as all_forms } from "./form.mjs";  
 
 //async rewriter functions - must wait for these during page load
 export { 

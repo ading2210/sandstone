@@ -2,10 +2,7 @@ import * as rewrite from "../rewrite/index.mjs";
 import { proxy_function } from "../context.mjs";
 
 function handle_append(element) {
-  if (element instanceof HTMLScriptElement) 
-    rewrite.script(element);
-  else if (element instanceof HTMLLinkElement && element.rel.includes("stylesheet")) 
-    rewrite.stylesheet(element);
+  rewrite.element(element);
 }
 
 proxy_function(globalThis?.HTMLElement?.prototype, "append", (target, this_arg, args) => {
