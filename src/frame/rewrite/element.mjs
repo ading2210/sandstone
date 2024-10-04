@@ -1,8 +1,8 @@
 import * as rewrite from "./index.mjs";
 
 export function rewrite_element(element) {
-  if (element instanceof Text)
-    return;
+  if (!(element instanceof Element))
+    return
   else if (element instanceof HTMLAnchorElement)
     return rewrite.anchor(element);
   else if (element.matches("img[src], source[src], img[srcset], source[srcset], video[src], audio[src]"))

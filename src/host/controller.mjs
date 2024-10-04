@@ -26,7 +26,7 @@ let frame_html = `
     <p id="loading_text">Loading...</p>
 
     <div id="error_div">
-      <h2>An unexpected network error has occurred</h2>
+      <h2>An unexpected error has occurred</h2>
       <pre id="error_msg">
       </pre>
     </div>
@@ -92,11 +92,7 @@ export class ProxyFrame {
         return [false, await response.text(), response.url];  
       }
       catch (error) {
-        let error_msg = error.stack;
-        if (!error.stack)
-          error_msg = new Error(error).stack;
-        if (!error_msg.includes(error))
-          error_msg = error + "\n\n" + error_msg;
+        let error_msg = util.format_error(error);
         return [error_msg, null, url];
       }
     }
@@ -112,13 +108,25 @@ export class ProxyFrame {
     }
 
     this.url = new URL(final_url);
-    await this.send_page({
-      url: this.url.href,
-      html: html, 
-      frame_id: this.id,
-      error: error,
-      local_storage: local_storage[this.url.origin]
-    });
+    try {
+      await this.send_page({
+        url: this.url.href,
+        html: html, 
+        frame_id: this.id,
+        error: error,
+        local_storage: local_storage[this.url.origin]
+      });
+    }
+    catch (error) {
+      let error_msg = util.format_error(error);
+      await this.send_page({
+        url: this.url.href,
+        html: html, 
+        frame_id: this.id,
+        error: error_msg,
+        local_storage: undefined
+      });
+    }
     this.iframe.style.backgroundColor = "unset";
     this.on_load();
   }

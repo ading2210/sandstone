@@ -22,7 +22,7 @@ export async function fetch(url, options) {
   let base_url = ctx.location?.href || loader.url;
   url = new URL(url, base_url);
   if (url.protocol === "data:" || url.protocol === "blob:") {
-    return await fetch(url.href, options);
+    return await globalThis.fetch(url.href, options);
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw TypeError("Invalid URL");

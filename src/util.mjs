@@ -21,3 +21,12 @@ export async function run_parallel(promises) {
   }
   return results;
 }
+
+export function format_error(error) {
+  let error_msg = error.stack;
+  if (!error.stack)
+    error_msg = new Error(error).stack;
+  if (!error_msg.includes(error))
+    error_msg = error + "\n\n" + error_msg;
+  return error_msg;
+}
