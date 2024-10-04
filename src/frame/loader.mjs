@@ -8,6 +8,8 @@ import { update_ctx, run_script, ctx, safe_script_template, wrap_obj } from "./c
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(rpc.parent, "navigate");
+export const local_storage = rpc.create_rpc_wrapper(rpc.parent, "local_storage");
+
 export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
 export let frame_id; //the current frame id
@@ -57,6 +59,13 @@ async function load_html(options) {
     document.getElementById("error_div").style.display = "initial";
     document.getElementById("error_msg").innerText = options.error;
     return;
+  }
+
+  //load local storage
+  if (options.local_storage) {
+    for (let [key, value] of options.local_storage) {
+      ctx.localStorage.setItem(key, value);
+    }
   }
 
   let parser = new DOMParser();

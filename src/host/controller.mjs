@@ -34,6 +34,8 @@ let frame_html = `
 `;
 
 export const iframes = {};
+export const persist_storage_key = "proxy_local_storage";
+export let local_storage = {};
 
 function get_frame_bundle() {
   if (!frame_url) {
@@ -72,7 +74,7 @@ export class ProxyFrame {
     }
 
     console.log("navigating to", url);
-    this.url = url;
+    this.url = new URL(url);
     this.iframe.style.backgroundColor = "#222222";
     this.on_navigate();
     this.iframe.src = get_frame_bundle();
@@ -104,12 +106,18 @@ export class ProxyFrame {
       download_html()
     ]))[1];
 
-    this.url = final_url
+    //load persisted local storage if needed
+    if (!local_storage && window.origin) {
+      local_storage = JSON.parse(localStorage.getItem(persist_storage_key));
+    }
+
+    this.url = new URL(final_url);
     await this.send_page({
-      url: this.url,
+      url: this.url.href,
       html: html, 
       frame_id: this.id,
-      error: error
+      error: error,
+      local_storage: local_storage[this.url.origin]
     });
     this.iframe.style.backgroundColor = "unset";
     this.on_load();
@@ -124,7 +132,17 @@ rpc.rpc_handlers["navigate"] = async (frame_id, url, reload=true) => {
     await frame.navigate_to(url);
   }
   else {
-    frame.url = url;
+    frame.url = new URL(url);
     frame.on_url_change();
+  }
+}
+
+rpc.rpc_handlers["local_storage"] = async (frame_id, entries) => {
+  let frame = iframes[frame_id];
+  if (!frame) return;
+  if (!frame.url.origin) debugger;
+  local_storage[frame.url.origin] = entries;
+  if (window.origin) {
+    localStorage.setItem(persist_storage_key, JSON.stringify(local_storage));
   }
 }

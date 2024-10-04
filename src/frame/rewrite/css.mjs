@@ -31,11 +31,9 @@ export async function parse_css(css_str, css_url) {
   let blobs = Object.fromEntries(url_contents);
 
   let count = 0;
-  css_str = css_str.replaceAll(url_regex, () => {
-    let original = matches[count][0];
-    let url = matches[count][1]
+  css_str = css_str.replaceAll(url_regex, (match, url) => {
     if (url.startsWith("data:") || url.startsWith("blob:")) {
-      return original;
+      return match;
     }
     
     let new_url = network.create_blob_url(blobs[url], url);

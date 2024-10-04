@@ -7,7 +7,9 @@ const internal = {
   self: null,
   globalThis: null,
   eval: null,
-  history: null
+  history: null,
+  localStorage: null,
+  sessionStorage: null
 };
 
 class CustomCTX {
@@ -29,6 +31,9 @@ class CustomCTX {
   get importScripts() {return is_worker ? polyfill.fakeImportScripts : undefined}
   get XMLHttpRequest() {return polyfill.FakeXMLHttpRequest}
   get history() {return internal.history}
+
+  get localStorage() {return internal.localStorage}
+  get sessionStorage() {return internal.sessionStorage}
 }
 
 export const ctx = new CustomCTX();
@@ -101,6 +106,8 @@ export function update_ctx() {
   internal.self = ctx;
   internal.globalThis = ctx;
   internal.history = new polyfill.FakeHistory();
+  internal.localStorage = new polyfill.FakeStorage("local");
+  internal.sessionStorage = new polyfill.FakeStorage("session");
 
   //wrap function calls
   wrap_obj(ctx, globalThis);

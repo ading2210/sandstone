@@ -9,13 +9,13 @@ let frame_container = from_id("frame_container");
 let main_frame = new proxy_host.controller.ProxyFrame();
 
 main_frame.on_navigate = () => {
-  url_box.value = main_frame.url;
+  url_box.value = main_frame.url.href;
   favicon_img.style.display = "none";
   favicon_text.style.display = "initial";
 }
 
 main_frame.on_load = async () => {
-  url_box.value = main_frame.url;
+  url_box.value = main_frame.url.href;
   let favicon = await main_frame.get_favicon();
   if (favicon === null) return;
   favicon_img.src = URL.createObjectURL(favicon);
@@ -24,7 +24,7 @@ main_frame.on_load = async () => {
 }
 
 main_frame.on_url_change = () => {
-  url_box.value = main_frame.url;
+  url_box.value = main_frame.url.href;
 }
 
 async function navigate_clicked() {
