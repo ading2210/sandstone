@@ -26,7 +26,7 @@ export function fakeImportScripts(...paths) {
   }
   //otherwise just log the url that was fetched
   else {
-    rpc.parent.postMessage({
+    self.postMessage({
       frame_id: loader.frame_id,
       urls: script_urls
     })
@@ -60,6 +60,7 @@ export class FakeWorker extends EventTarget {
       ${loader.runtime_src}
       proxy_frame.loader.set_url("${loader.url}");
       proxy_frame.loader.set_frame_id("${worker_id}");
+      proxy_frame.rpc.set_parent(new MessageChannel());
       proxy_frame.context.update_ctx();
       proxy_frame.context.run_script(${worker_js});
     `;
@@ -68,11 +69,12 @@ export class FakeWorker extends EventTarget {
 
     if (this.#terminated) return;
     let temp_worker = new Worker(temp_blob_url, this.#options);
-    let recorded_urls = [];
+    let recorded_urls = new Set();
     let terminate_worker;
     temp_worker.onmessage = (event) => {
       if (event.data.frame_id !== worker_id) return;
-      recorded_urls = recorded_urls.concat(recorded_urls, event.data.urls);
+      for (let url of event.data.urls)
+        recorded_urls.add(url);
     }
     temp_worker.onerror = () => {
       terminate_worker();
@@ -98,6 +100,7 @@ export class FakeWorker extends EventTarget {
     }
     await util.run_parallel(promises);
 
+    console.log("DEBUG recorded urls", recorded_urls);
     let cache_puts = [];
     for (let url of recorded_urls) {
       let safe_url = JSON.stringify(url);
@@ -110,9 +113,9 @@ export class FakeWorker extends EventTarget {
       ${cache_substr}
       proxy_frame.loader.set_url(${JSON.stringify(loader.url)});
       proxy_frame.loader.set_frame_id("${worker_id}");
+      proxy_frame.rpc.set_parent(new MessageChannel());
       proxy_frame.network.enable_network();
       proxy_frame.context.update_ctx();
-      proxy_frame.context.run_script("console.log(self)");
       proxy_frame.context.run_script(${worker_js});
     `;
     let real_blob = new Blob([real_script], {type: "text/javascript"});
@@ -122,6 +125,12 @@ export class FakeWorker extends EventTarget {
     for (let event of ["error", "message", "messageerror"]) {
       this.#setup_listener(event);
     }
+
+    //forward the attach message to the parent frame
+    this.#worker.addEventListener("message", (event) => {
+      rpc.message_listener(event);
+      event.stopImmediatePropagation();
+    }, {once: true});
   }
 
   #setup_listener(event_name) {

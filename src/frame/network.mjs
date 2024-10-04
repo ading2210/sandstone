@@ -2,7 +2,7 @@ import * as rpc from "../rpc.mjs";
 import * as loader from "./loader.mjs";
 import { ctx } from "./context.mjs";
 
-export const rpc_fetch = rpc.create_rpc_wrapper(rpc.parent, "fetch");
+export const rpc_fetch = rpc.create_rpc_wrapper("parent", "fetch");
 
 export const known_urls = {};
 export const resource_cache = {};

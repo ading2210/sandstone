@@ -7,8 +7,8 @@ import { custom_document } from "./intercept/document.mjs";
 import { update_ctx, run_script, ctx, safe_script_template, wrap_obj } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
-export const navigate = rpc.create_rpc_wrapper(rpc.parent, "navigate");
-export const local_storage = rpc.create_rpc_wrapper(rpc.parent, "local_storage");
+export const navigate = rpc.create_rpc_wrapper("parent", "navigate");
+export const local_storage = rpc.create_rpc_wrapper("parent", "local_storage");
 
 export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
