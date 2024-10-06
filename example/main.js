@@ -34,10 +34,17 @@ async function navigate_clicked() {
 }
 
 async function main() {
+  if (location.hash)
+    url_box.value = location.hash.substring(1);
+
   if (location.protocol !== "http:" && location.protocol !== "https:") 
     proxy_host.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
-  else 
-    proxy_host.libcurl.set_websocket(location.href.replace("http", "ws"));
+  else {
+    let ws_url = new URL(location.href);
+    ws_url.protocol = "wss:";
+    proxy_host.libcurl.set_websocket(ws_url.origin);
+  }
+    
   
   navigate_button.onclick = navigate_clicked;
   url_box.onkeydown = (event) => {

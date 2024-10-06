@@ -53,7 +53,7 @@ export class ProxyFrame {
     this.url = null;
     this.id = Math.random() + "";
     this.iframe = document.createElement("iframe");
-    this.iframe.sandbox = "allow-scripts allow-forms";
+    this.iframe.sandbox = "allow-scripts allow-forms allow-modals";
     this.iframe.setAttribute("frame-id", this.id);
 
     iframes[this.id] = this;
@@ -81,7 +81,7 @@ export class ProxyFrame {
     this.iframe.style.backgroundColor = "#222222";
     this.on_navigate();
     this.iframe.src = get_frame_bundle();
-    network.clean_ws_connections();
+    network.clean_ws_connections(this.id);
 
     let wait_for_load = () => {
       new Promise((resolve) => {

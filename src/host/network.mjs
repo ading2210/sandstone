@@ -92,11 +92,11 @@ rpc_handlers["ws_close"] = function (frame_id, ws_id) {
 }
 
 //when navigating to a new page we need to close unused connections
-export function clean_ws_connections() {
+export function clean_ws_connections(id_to_clean) {
   let frame_ids = Object.keys(iframes);
   
   for (let [frame_id, frame_websockets] of Object.entries(ws_connections)) {
-    if (!frame_ids.includes(frame_id)) continue;
+    if (frame_ids.includes(frame_id) && frame_id !== id_to_clean) continue;
     
     for (let [ws_id, ws_info] of Object.entries(frame_websockets)) {
       delete ws_connections[frame_id][ws_id];

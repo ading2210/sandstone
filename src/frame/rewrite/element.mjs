@@ -3,21 +3,26 @@ import * as rewrite from "./index.mjs";
 export function rewrite_element(element) {
   if (!(element instanceof Element))
     return
-  else if (element instanceof HTMLAnchorElement)
-    return rewrite.anchor(element);
+
+  if (element instanceof HTMLAnchorElement)
+    rewrite.anchor(element);
   else if (element.matches("img[src], source[src], img[srcset], source[srcset], video[src], audio[src]"))
-    return rewrite.media(element);
+    rewrite.media(element);
   else if (element instanceof HTMLLinkElement && element.rel !== "stylesheet")
-    return rewrite.link(element);
+    rewrite.link(element);
   else if (element instanceof HTMLMetaElement)
-    return rewrite.meta(element);
+    rewrite.meta(element);
   else if (element.tagName === "noscript")
-    return rewrite.noscript(element);
+    rewrite.noscript(element);
 
   else if (element instanceof HTMLLinkElement && element.rel === "stylesheet")
-    return rewrite.stylesheet(element);
+    rewrite.stylesheet(element);
   else if (element instanceof HTMLStyleElement)
-    return rewrite.style(element);
+    rewrite.style(element);
   else if (element instanceof HTMLScriptElement)
-    return rewrite.script(element);
+    rewrite.script(element);
+
+  for (let child of element.children) {
+    rewrite.element(child);
+  }
 }

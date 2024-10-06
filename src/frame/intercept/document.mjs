@@ -7,7 +7,6 @@ class CustomDocument {
   get URL() {return ctx.location.href}
 
   createElement(tag_name, options) {
-    console.log("DEBUG document.createElement", tag_name, options);
     return this.__target__.createElement(tag_name, options);
   }
 }

@@ -55,7 +55,6 @@ export function wrap_function(key, wrapper, target) {
 
 export function wrap_obj(wrapper, target) {
   wrapper.__target__ = target;
-  console.log(wrapper, target); 
   let wrapper_proto = Object.getPrototypeOf(wrapper);
   let target_keys = Reflect.ownKeys(target);
   let target_proto = Object.getPrototypeOf(target);

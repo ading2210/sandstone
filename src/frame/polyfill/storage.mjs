@@ -57,4 +57,8 @@ export class FakeStorage {
   _get_entries() {
     return [...this.#map];
   }
+
+  toString() {
+    return "[object Storage]";
+  }
 }

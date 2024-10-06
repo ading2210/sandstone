@@ -29,4 +29,10 @@ export class FakeLocation {
     internal = new URL(url, internal);
     loader.navigate(loader.frame_id, internal.href);
   }
+  replace(url) {
+    this.assign(url);
+  }
+  reload() {
+    this.assign(this.href);
+  }
 }

@@ -131,6 +131,10 @@ export class FakeWorker extends EventTarget {
       rpc.message_listener(event);
       event.stopImmediatePropagation();
     }, {once: true});
+
+    window.addEventListener("beforeunload", () => {
+      this.terminate();
+    }, null, true);
   }
 
   #setup_listener(event_name) {

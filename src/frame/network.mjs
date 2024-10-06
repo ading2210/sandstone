@@ -88,10 +88,7 @@ export class WebSocket extends EventTarget {
 
   async #connect() {
     this.#ws_id = await rpc_ws_new(loader.frame_id, this.url, this.protocols, {
-      headers: {
-        "Origin": ctx.location.origin
-      },
-      verbose: 1
+      headers: {"Origin": ctx.location.origin}
     });
     this.#event_loop();
   }
@@ -99,7 +96,6 @@ export class WebSocket extends EventTarget {
   async #event_loop() {
     while (true) {
       let events = await rpc_ws_event(loader.frame_id, this.#ws_id);
-      console.log("DEBUG ws events", events);
       if (!events) break;
       for (let [event_name, data] of events) {
         this.#forward_event(event_name, data);
