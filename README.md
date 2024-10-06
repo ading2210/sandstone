@@ -28,8 +28,7 @@ This is at a very early stage of development and lacks support for most web APIs
 - Anchor tags (mostly)
 - HTML redirects
 
-### Unimplemented Features
-- WebSockets
+### Notable Unimplemented Features
 - HTML forms
 - Cookies
 - ES6 modules

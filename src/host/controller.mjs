@@ -1,9 +1,12 @@
 import * as rpc from "../rpc.mjs";
 import * as util from "../util.mjs";
+import * as network from "./network.mjs";
 
 import { libcurl } from "libcurl.js/bundled";
 
+//frame_js is a string, which is imported using webpack
 import frame_js from "../../dist/frame.js";
+
 let frame_url = null;
 let frame_html = `
   <!DOCTYPE html>
@@ -78,6 +81,7 @@ export class ProxyFrame {
     this.iframe.style.backgroundColor = "#222222";
     this.on_navigate();
     this.iframe.src = get_frame_bundle();
+    network.clean_ws_connections();
 
     let wait_for_load = () => {
       new Promise((resolve) => {

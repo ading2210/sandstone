@@ -1,3 +1,4 @@
+import * as network from "./network.mjs";
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 
@@ -34,6 +35,7 @@ class CustomCTX {
 
   get localStorage() {return internal.localStorage}
   get sessionStorage() {return internal.sessionStorage}
+  get WebSocket() {return network.WebSocket}
 }
 
 export const ctx = new CustomCTX();
@@ -49,17 +51,6 @@ export function wrap_function(key, wrapper, target) {
       return Reflect.apply(func_target, target, arguments_list);
     }
   });
-  /*
-  let hidden_sym = Symbol();
-  let func = target[key];
-  wrapper[key] = function() {
-    if (this && this[hidden_sym]) return new func(...arguments);
-    return func(...arguments);
-  }
-  Object.setPrototypeOf(wrapper[key], func);
-  if (func.prototype) wrapper[key].prototype = func.prototype;
-  wrapper[key].prototype[hidden_sym] = true; 
-  */
 }
 
 export function wrap_obj(wrapper, target) {

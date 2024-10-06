@@ -30,3 +30,27 @@ export function format_error(error) {
     error_msg = error + "\n\n" + error_msg;
   return error_msg;
 }
+
+//convert various data types to a uint8array (blobs excluded)
+//taken from libcurl.js source
+export function data_to_array(data) {
+  //data already in correct type
+  if (data instanceof Uint8Array) {
+    return data;  
+  }
+
+  else if (typeof data === "string") {
+    return new TextEncoder().encode(data);
+  }
+
+  else if (data instanceof ArrayBuffer) {
+    return new Uint8Array(data);
+  }
+
+  //dataview objects or any other typedarray
+  else if (ArrayBuffer.isView(data)) {
+    return new Uint8Array(data.buffer);
+  }
+
+  throw new TypeError("invalid data type to be sent");
+}
