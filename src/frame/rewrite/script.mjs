@@ -1,12 +1,12 @@
-import * as util from "../../util.mjs";
 import * as network from "../network.mjs";
 import * as loader from "../loader.mjs";
-import { ctx, run_script, run_script_safe, convert_url } from "../context.mjs";
+
+import { ctx, run_script_safe, convert_url, intercept_property } from "../context.mjs";
 
 export const pending_scripts = {};
 
 export function should_load(element) {
-  if (!element.type || element.type === "application/javascript") 
+  if (!element.type || element.type === "application/javascript" || element.type === "text/javascript") 
     return true;
   return false;
 }
@@ -17,17 +17,38 @@ export async function rewrite_script(script_element) {
   }
 
   let script_text = script_element.innerHTML; 
+  let script_url = script_element.src;
+  let src_descriptor = intercept_property(script_element, "src", {
+    get: () => {
+      return script_url;
+    },
+    set: async (value) => {
+      script_url = value;
+      await download_src();
+      run_script();
+    }
+  });
+  script_element.removeAttribute("src");
 
-  if (script_element.src) {
-    let src_url = convert_url(script_element.src, ctx.location.href);
+  async function download_src() {
+    let src_url = convert_url(script_url, ctx.location.href);
     let response = await network.fetch(src_url);
     script_text = await response.text();
-    script_element.setAttribute("__src", script_element.src);
+  }
+
+  function run_script() {
+    ctx.document.currentScript = script_element;
+    run_script_safe(script_text);
+    ctx.document.currentScript = null;
+    script_element.dispatchEvent(new Event("load"));
+  }
+
+  if (script_url) {
+    await download_src();
   }
 
   if (loader.is_loaded) {
-    run_script_safe(script_text);
-    script_element.dispatchEvent(new Event("load"));
+    run_script();
   }
   else {
     let script_id = "" + Math.random();

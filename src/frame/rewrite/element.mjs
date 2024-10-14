@@ -44,7 +44,7 @@ function rewrite_element_single(element) {
     element.style.cssText = "";
     let new_css = parse_css(inline_style, ctx.location.href)
     if (typeof new_css === "string") {
-      element.style.cssText = new_css
+      element.style.cssText = new_css;
     }
     else {
       promises.push((async () => {

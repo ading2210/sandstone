@@ -1,5 +1,4 @@
 import * as rpc from "../rpc.mjs";
-import * as util from "../util.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
@@ -24,18 +23,22 @@ function evaluate_scripts() {
 
     if (script_element.hasAttribute("__script_id")) {
       let script_id = script_element.getAttribute("__script_id");
-      script_strings.push(pending_scripts[script_id]);
+      script_strings.push([script_id, pending_scripts[script_id]]);
       delete pending_scripts[script_id];
     }
     else if (should_load(script_element)) {
-      script_strings.push(script_element.innerHTML);
+      script_strings.push([script_id, script_element.innerHTML]);
     }
   }
-
   
   let wrapped_scripts = [];
-  for (let script of script_strings) {
-    wrapped_scripts.push(safe_script_template(script));
+  for (let [script_id, script] of script_strings) {
+    let script_part = `
+      document.currentScript = document.querySelector("script[__script_id='${script_id}']");
+      ${safe_script_template(script)}
+      document.currentScript = null;
+    `;
+    wrapped_scripts.push(script_part);
   }
   run_script(wrapped_scripts.join("\n\n"));
 }
@@ -98,6 +101,7 @@ async function load_html(options) {
   }
 
   //apply the rewritten html
+  console.log("done downloading page");
   document.documentElement.replaceWith(html.documentElement);
   wrap_obj(custom_document, document);
   evaluate_scripts();
