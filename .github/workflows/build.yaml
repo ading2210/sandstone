@@ -1,0 +1,35 @@
+name: build
+on: [push]
+
+jobs:
+  build:
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: download repo
+        uses: actions/checkout@v4
+      
+      - name: run build
+        run: |
+          npm i
+          npm run build:prod
+          cd example
+          npm i
+          npm run build
+          mv bundled.html dist/sandstone.html
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sandstone
+          path: example/dist/sandstone.html
+          compression-level: 9
+  
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: example/dist/sandstone.html
