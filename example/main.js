@@ -5,6 +5,11 @@ let favicon_text = from_id("favicon_text");
 let navigate_button = from_id("navigate_button");
 let url_box = from_id("url_box");
 let frame_container = from_id("frame_container");
+let version_text = from_id("version_text");
+let options_button = from_id("options_button");
+let options_div = from_id("options_div");
+let wisp_url_input = from_id("wisp_url_input");
+let close_options_button = from_id("close_options_button");
 
 let main_frame = new sandstone.controller.ProxyFrame();
 
@@ -33,18 +38,34 @@ async function navigate_clicked() {
   await main_frame.navigate_to(url_box.value);
 }
 
+function toggle_options() {
+  options_div.style.display = options_div.style.display === "none" ? "flex" : "none";
+  
+  //apply options
+  sandstone.libcurl.set_websocket(wisp_url_input.value);
+}
+
 async function main() {
   if (location.hash)
     url_box.value = location.hash.substring(1);
 
+  let wisp_url = "wss://wisp.mercurywork.shop/";
   if (location.protocol !== "http:" && location.protocol !== "https:") 
-    sandstone.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
+    sandstone.libcurl.set_websocket(wisp_url);
   else {
-    let ws_url = new URL(location.href);
-    ws_url.protocol = "wss:";
-    sandstone.libcurl.set_websocket(ws_url.origin);
+    wisp_url = location.origin.replace("http", "ws");
+    sandstone.libcurl.set_websocket(wisp_url);
   }
-    
+
+  version_text.textContent = `v${sandstone.version.ver} (${sandstone.version.hash})`;
+  wisp_url_input.value = wisp_url;
+  options_button.onclick = toggle_options;
+  close_options_button.onclick = toggle_options;
+  document.body.onkeydown = (event) => {
+    if (event.key !== "Escape") return;
+    if (options_div.style.display === "none") return;
+    toggle_options();
+  }
   
   navigate_button.onclick = navigate_clicked;
   url_box.onkeydown = (event) => {
