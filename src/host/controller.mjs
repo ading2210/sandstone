@@ -2,6 +2,8 @@ import * as rpc from "../rpc.mjs";
 import * as util from "../util.mjs";
 import * as network from "./network.mjs";
 
+import { version } from "./index.mjs";
+
 import { libcurl } from "libcurl.js/bundled";
 
 //frame_js is a string, which is imported using webpack
@@ -23,6 +25,9 @@ let frame_html = `
       #error_div {
         display: none;
       }
+      #version_text {
+        font-size: 14px;
+      }
     </style>
   </head>
   <body>
@@ -32,6 +37,9 @@ let frame_html = `
       <h2>An unexpected error has occurred</h2>
       <pre id="error_msg">
       </pre>
+      <p><i>
+        <span id="version_text"></span>
+      </p></i>
     </div>
   </body>
 `;
@@ -118,7 +126,8 @@ export class ProxyFrame {
         html: html, 
         frame_id: this.id,
         error: error,
-        local_storage: local_storage[this.url.origin]
+        local_storage: local_storage[this.url.origin],
+        version: version
       });
     }
     catch (error) {
@@ -128,7 +137,8 @@ export class ProxyFrame {
         html: html, 
         frame_id: this.id,
         error: error_msg,
-        local_storage: undefined
+        local_storage: undefined,
+        version: version
       });
     }
     this.iframe.style.backgroundColor = "unset";

@@ -48,7 +48,7 @@ This is at a very early stage of development and lacks support for most web APIs
 
 ## License
 ```
-ading2210/newproxy - A web proxy using sandboxed iframes 
+ading2210/sandstone - A web proxy using sandboxed iframes 
 Copyright (C) 2024 ading2210
 
 This program is free software: you can redistribute it and/or modify

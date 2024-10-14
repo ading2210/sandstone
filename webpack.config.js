@@ -1,3 +1,8 @@
+const webpack = require("webpack");
+const pkg = require("./package.json");
+const { execSync } = require("child_process");
+const git_hash = execSync("git rev-parse --short HEAD").toString().trim();
+
 module.exports = [
   {
     name: "frame",
@@ -30,6 +35,12 @@ module.exports = [
         },
       ],
     },
-    mode: "development"
+    mode: "development",
+    plugins: [
+      new webpack.DefinePlugin({
+        __VERSION__: JSON.stringify(pkg.version),
+        __GIT_HASH__: JSON.stringify(git_hash)
+     })
+    ]
   },
 ];

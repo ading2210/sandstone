@@ -61,6 +61,7 @@ async function load_html(options) {
     document.getElementById("loading_text").style.display = "none";
     document.getElementById("error_div").style.display = "initial";
     document.getElementById("error_msg").innerText = options.error;
+    document.getElementById("version_text").innerText = `Sandstone v${options.version.ver} (${options.version.hash})`;
     return;
   }
 
