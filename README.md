@@ -1,6 +1,8 @@
-# Experimental Web Proxy
+# Sandstone
 
-This is an experimental web proxy utilizing sandboxed iframes and no service worker.
+[<img src="https://upload.wikimedia.org/wikipedia/commons/a/af/USDA_Mineral_Sandstone_93c3955.jpg?20050520171627" height="128px">](https://commons.wikimedia.org/wiki/File:USDA_Mineral_Sandstone_93c3955.jpg)
+
+Sandstone is an experimental web proxy utilizing sandboxed iframes and no service worker.
 
 ## Features
 - Every proxied page runs in a sandboxed iframe
@@ -25,13 +27,24 @@ This is at a very early stage of development and lacks support for most web APIs
 - XMLHttpRequest
 - Media elements such as `<img>`
 - CSS rewriting
-- Anchor tags (mostly)
+- Anchor tags 
 - HTML redirects
+- HTML forms
 
 ### Notable Unimplemented Features
-- HTML forms
 - Cookies
 - ES6 modules
+
+## Usage
+### Building
+1. Clone this repository and cd into it.
+2. Run `npm i` to install the dependencies.
+3. Run `npm run build:prod` to bundle the client JS. You may also use `npm run dev`.
+
+### Running the Example Frontend
+1. Cd into the `example` subdirectory
+2. Run `npm i` to install the server dependencies
+3. Run `npm run start` which will start the web server
 
 ## License
 ```
