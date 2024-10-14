@@ -29,9 +29,17 @@
         <label for="wisp_url_input">Wisp URL:</label>
         <input id="wisp_url_input" type="text" style="flex-grow: 1">
       </div>
-      <div style="flex-grow: 1"></div>
       
-      <p id="version_p">
+      <div style="display: flex; gap: 8px;">
+        <p style="font-size: 16px;">Eval JS:</p>
+        <div style="flex-grow: 1"></div>
+        <button id="eval_js_button">Run</button>
+      </div>
+      
+      <textarea id="eval_js_input"></textarea>
+
+      <div style="flex-grow: 1"></div>
+      <p id="version_p" style="font-size: 14px;">
         <a href="https://github.com/ading2210/sandstone" target="_blank">
           <i>Sandstone <span id="version_text"></span></i>
         </a>

@@ -67,6 +67,7 @@ export class ProxyFrame {
     iframes[this.id] = this;
     this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
     this.get_favicon = rpc.create_rpc_wrapper(this.iframe, "favicon");
+    this.eval_js = rpc.create_rpc_wrapper(this.iframe, "eval");
 
     this.on_navigate = () => {};
     this.on_load = () => {};

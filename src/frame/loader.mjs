@@ -3,7 +3,7 @@ import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
 import { custom_document } from "./intercept/document.mjs";
-import { update_ctx, run_script, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
+import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper("parent", "navigate");
@@ -131,5 +131,10 @@ async function get_favicon() {
   return await response.blob();
 }
 
+function external_eval(js) {
+  run_script_safe(js);
+}
+
 rpc.rpc_handlers["html"] = load_html;
 rpc.rpc_handlers["favicon"] = get_favicon;
+rpc.rpc_handlers["eval"] = external_eval;

@@ -10,6 +10,8 @@ let options_button = from_id("options_button");
 let options_div = from_id("options_div");
 let wisp_url_input = from_id("wisp_url_input");
 let close_options_button = from_id("close_options_button");
+let eval_js_input = from_id("eval_js_input");
+let eval_js_button = from_id("eval_js_button");
 
 let main_frame = new sandstone.controller.ProxyFrame();
 
@@ -65,6 +67,10 @@ async function main() {
     if (event.key !== "Escape") return;
     if (options_div.style.display === "none") return;
     toggle_options();
+  }
+
+  eval_js_button.onclick = () => {
+    main_frame.eval_js(eval_js_input.value);
   }
   
   navigate_button.onclick = navigate_clicked;
