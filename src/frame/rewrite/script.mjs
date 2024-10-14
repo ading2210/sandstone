@@ -35,32 +35,3 @@ export async function rewrite_script(script_element) {
     pending_scripts[script_id] = script_text;
   }
 }
-
-export async function rewrite_all_scripts(html) {
-  //download all script elements with an src
-  let script_elements = html.getElementsByTagName("script");
-  let promises = [...script_elements].map((element) => {
-    return rewrite_script(element);
-  });
-
-  //patch event handler attributes for all tags
-  let all_elements = html.getElementsByTagName("*");
-  for (let i = 0; i < all_elements.length; i++) {
-    let element = all_elements[i];
-    
-    for (let j = 0; j < element.attributes.length; j++) {
-      let attribute = element.attributes[j].name;
-      if (!attribute.startsWith("on")) continue;
-      let handler_script = element.getAttribute(attribute);
-      let event_name = attribute.substring(2);
-
-      element.setAttribute("__" + attribute, handler_script);
-      element.removeAttribute(attribute);
-      element.addEventListener(event_name, () => {
-        run_script(handler_script, element);
-      })
-    }
-  }
-
-  await util.run_parallel(promises);
-}

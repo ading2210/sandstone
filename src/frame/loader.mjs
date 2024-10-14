@@ -4,7 +4,7 @@ import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
 import { custom_document } from "./intercept/document.mjs";
-import { update_ctx, run_script, ctx, safe_script_template, wrap_obj } from "./context.mjs";
+import { update_ctx, run_script, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper("parent", "navigate");
@@ -71,20 +71,22 @@ async function load_html(options) {
   let parser = new DOMParser();
   let html = parser.parseFromString(options.html, "text/html");  
   
-  //these run synchronously
-  rewrite.all_noscript(html);
-  rewrite.all_anchor(html);
-  rewrite.all_links(html);
-  rewrite.all_meta(html);
-  rewrite.all_media(html);
-  rewrite.all_forms(html);
-  
-  //run the async ones in parallel
-  await util.run_parallel([
-    rewrite.all_stylesheets(html),
-    rewrite.all_styles(html),
-    rewrite.all_scripts(html)
-  ]);
+  //rewrite all html elements
+  await rewrite.element(html.documentElement);
+
+  //add handler for navigation
+  document.addEventListener("click", (event) => {
+    let element = event.target;
+    while (element && !(element instanceof HTMLAnchorElement)) {
+      element = element.parentElement;
+    }
+    if (!element) return;
+    
+    let original_href = convert_url(element.href, ctx.location.href);
+    navigate(frame_id, original_href);
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  });
 
   //parse elements with ids and add them to the scope
   let id_elements = html.querySelectorAll("*[id]");

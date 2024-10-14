@@ -54,3 +54,8 @@ export function data_to_array(data) {
 
   throw new TypeError("invalid data type to be sent");
 }
+
+export function url_is_http(url) {
+  let url_obj = new URL(url, "http://example.com/");
+  return url_obj.protocol === "http:" || url_obj.protocol === "https:";
+}

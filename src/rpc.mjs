@@ -17,6 +17,7 @@ async function handle_procedure_call(msg) {
     };
   }
   catch (e) {
+    console.error(e);
     output = {
       value: e,
       success: false
