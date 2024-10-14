@@ -58,11 +58,11 @@ export class FakeWorker extends EventTarget {
     let worker_id = "" + Math.random();
     let temp_script = `
       ${loader.runtime_src}
-      proxy_frame.loader.set_url("${loader.url}");
-      proxy_frame.loader.set_frame_id("${worker_id}");
-      proxy_frame.rpc.set_parent(new MessageChannel());
-      proxy_frame.context.update_ctx();
-      proxy_frame.context.run_script(${worker_js});
+      sandstone_frame.loader.set_url("${loader.url}");
+      sandstone_frame.loader.set_frame_id("${worker_id}");
+      sandstone_frame.rpc.set_parent(new MessageChannel());
+      sandstone_frame.context.update_ctx();
+      sandstone_frame.context.run_script(${worker_js});
     `;
     let temp_blob = new Blob([temp_script], {type: "text/javascript"});
     let temp_blob_url = URL.createObjectURL(temp_blob);
@@ -105,18 +105,18 @@ export class FakeWorker extends EventTarget {
     for (let url of recorded_urls) {
       let safe_url = JSON.stringify(url);
       let safe_contents = JSON.stringify(script_data[url]);
-      cache_puts.push(`proxy_frame.network.cache_put(${safe_url}, ${safe_contents});`);
+      cache_puts.push(`sandstone_frame.network.cache_put(${safe_url}, ${safe_contents});`);
     }
     let cache_substr = cache_puts.join("\n");
     let real_script = `
       ${loader.runtime_src}
       ${cache_substr}
-      proxy_frame.loader.set_url(${JSON.stringify(loader.url)});
-      proxy_frame.loader.set_frame_id("${worker_id}");
-      proxy_frame.rpc.set_parent(new MessageChannel());
-      proxy_frame.network.enable_network();
-      proxy_frame.context.update_ctx();
-      proxy_frame.context.run_script(${worker_js});
+      sandstone_frame.loader.set_url(${JSON.stringify(loader.url)});
+      sandstone_frame.loader.set_frame_id("${worker_id}");
+      sandstone_frame.rpc.set_parent(new MessageChannel());
+      sandstone_frame.network.enable_network();
+      sandstone_frame.context.update_ctx();
+      sandstone_frame.context.run_script(${worker_js});
     `;
     let real_blob = new Blob([real_script], {type: "text/javascript"});
     let real_blob_url = network.create_blob_url(real_blob, this.#url);

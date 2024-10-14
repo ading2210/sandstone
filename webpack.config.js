@@ -10,20 +10,20 @@ module.exports = [
     output: {
       filename: "frame.js",
       library: {
-        name: "proxy_frame",
+        name: "sandstone_frame",
         type: "var"
       }
     },
     mode: "development"
   },
   {
-    name: "host",
+    name: "sandstone",
     dependencies: ["frame"],
     entry: "./src/host/index.mjs",
     output: {
-      filename: "host.js",
+      filename: "sandstone.js",
       library: {
-        name: "proxy_host",
+        name: "sandstone",
         type: "var"
       }
     },

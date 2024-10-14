@@ -6,7 +6,7 @@ let navigate_button = from_id("navigate_button");
 let url_box = from_id("url_box");
 let frame_container = from_id("frame_container");
 
-let main_frame = new proxy_host.controller.ProxyFrame();
+let main_frame = new sandstone.controller.ProxyFrame();
 
 main_frame.on_navigate = () => {
   url_box.value = main_frame.url.href;
@@ -38,11 +38,11 @@ async function main() {
     url_box.value = location.hash.substring(1);
 
   if (location.protocol !== "http:" && location.protocol !== "https:") 
-    proxy_host.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
+    sandstone.libcurl.set_websocket("wss://wisp.mercurywork.shop/");
   else {
     let ws_url = new URL(location.href);
     ws_url.protocol = "wss:";
-    proxy_host.libcurl.set_websocket(ws_url.origin);
+    sandstone.libcurl.set_websocket(ws_url.origin);
   }
     
   
