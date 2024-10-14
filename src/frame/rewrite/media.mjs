@@ -5,9 +5,11 @@ import * as util from "../../util.mjs";
 export function rewrite_media(media_element) {
   let media_src = media_element.src;
 
-  if (media_element instanceof HTMLSourceElement) {
-    media_element.remove();
-    return;
+  //ensure there is only one source element in a video tag
+  if (media_element instanceof HTMLVideoElement) {
+    let source = media_element.querySelector("source[src]");
+    while (media_element.lastChild !== source) 
+      media_element.lastChild.remove();
   }
 
   let media_url = "";
@@ -18,6 +20,20 @@ export function rewrite_media(media_element) {
     let media_blob = await response.blob();
     let blob_url = URL.createObjectURL(media_blob);
     media_element.src = blob_url;
+
+    //if this is a source element for a media element, we should load the video
+    if (media_element instanceof HTMLSourceElement) {
+      //debugger;
+      let parent = media_element.parentNode;
+      while (parent && !(parent instanceof HTMLVideoElement))
+        parent = parent.parentNode;
+      if (!parent) 
+        return;
+
+      parent.load();
+      if (!parent.autoplay) return
+      parent.play();
+    }
   };
   let src_descriptor = intercept_property(media_element, "src", {
     get() {

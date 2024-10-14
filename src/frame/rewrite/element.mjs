@@ -8,7 +8,7 @@ function rewrite_element_single(element) {
   let promise;
   if (element.tagName === "NOSCRIPT")
     promise = rewrite.noscript(element);
-  else if (element.matches("img, source[src], source[srcset], video[src], audio[src]"))
+  else if (element.matches("img, source, video, audio"))
     promise = rewrite.media(element);
   else if (element instanceof HTMLLinkElement && element.rel !== "stylesheet")
     promise = rewrite.link(element);

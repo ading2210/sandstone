@@ -79,6 +79,7 @@ async function load_html(options) {
 
   //add handler for navigation
   document.addEventListener("click", (event) => {
+    if (event.defaultPrevented) return;
     let element = event.target;
     while (element && !(element instanceof HTMLAnchorElement)) {
       element = element.parentElement;
