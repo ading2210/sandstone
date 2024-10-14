@@ -6,20 +6,22 @@ import { ctx, run_script } from "../context.mjs";
 function rewrite_element_single(element) {
   //handlers for specific tags
   let promise;
-  if (element.matches("img[src], source[src], img[srcset], source[srcset], video[src], audio[src]"))
+  if (element.tagName === "NOSCRIPT")
+    promise = rewrite.noscript(element);
+  else if (element.matches("img[src], source[src], img[srcset], source[srcset], video[src], audio[src]"))
     promise = rewrite.media(element);
   else if (element instanceof HTMLLinkElement && element.rel !== "stylesheet")
     promise = rewrite.link(element);
   else if (element instanceof HTMLMetaElement)
     promise = rewrite.meta(element);
-  else if (element.tagName === "noscript")
-    promise = rewrite.noscript(element);
   else if (element instanceof HTMLLinkElement && element.rel === "stylesheet")
     promise = rewrite.stylesheet(element);
   else if (element instanceof HTMLStyleElement)
     promise = rewrite.style(element);
   else if (element instanceof HTMLScriptElement)
     promise = rewrite.script(element);
+  else if (element instanceof HTMLFormElement)
+    promise = rewrite.form(element);
   let promises = [promise];
 
   //patch event handler attributes for all tags
@@ -50,7 +52,7 @@ function rewrite_element_single(element) {
       })());
     }
   }
-  
+
   return promises;
 }
 
@@ -66,7 +68,8 @@ export function rewrite_element(element) {
   }
   
   //recursively rewrite children
-  for (let child of element.children) {
+  let children = [...element.children];
+  for (let child of children) {
     promises.push(rewrite_element(child));
   }
 
@@ -76,17 +79,4 @@ export function rewrite_element(element) {
     return undefined;
   //otherwise we can let the caller wait for all promises to resolve
   return Promise.all(promises);
-}
-
-export function intercept_property(target, key, handler) {
-  let descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
-  if (!descriptor) return;
-  try {
-    Object.defineProperty(target, key, handler);
-  }
-  catch (e) {
-    console.error(e);
-    console.error(target, key, handler);
-  }
-  return descriptor;
 }

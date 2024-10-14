@@ -8,6 +8,12 @@ export function set_websocket(url) {
   libcurl.set_websocket(url);
 }
 
+function get_ws(frame_id, ws_id) {
+  let frame_websockets = ws_connections[frame_id];
+  if (!frame_websockets) return;
+  return frame_websockets[ws_id];
+}
+
 //handle fetch api requests
 rpc_handlers["fetch"] = async function(url, options) {
   let response = await libcurl.fetch(url, options);
@@ -61,7 +67,7 @@ rpc_handlers["ws_new"] = function (frame_id, url, protocols, options) {
 
 //the frame will call this repeatedly to poll for new events
 rpc_handlers["ws_event"] = function (frame_id, ws_id) {
-  let ws_info = ws_connections[frame_id][ws_id];
+  let ws_info = get_ws(frame_id, ws_id);
   if (!ws_info) return null;
   if (ws_info.events.length > 0) {
     let ws_events = ws_info.events;
@@ -79,13 +85,13 @@ rpc_handlers["ws_event"] = function (frame_id, ws_id) {
 }
 
 rpc_handlers["ws_send"] = function (frame_id, ws_id, data) {
-  let ws_info = ws_connections[frame_id][ws_id];
+  let ws_info = get_ws(frame_id, ws_id);
   if (!ws_info) return;
   ws_info.ws.send(data);
 }
 
 rpc_handlers["ws_close"] = function (frame_id, ws_id) {
-  let ws_info = ws_connections[frame_id][ws_id];
+  let ws_info = get_ws(frame_id, ws_id);
   if (!ws_info) return;
   delete ws_connections[frame_id][ws_id];
   ws_info.ws.close();

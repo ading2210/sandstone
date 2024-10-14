@@ -140,3 +140,10 @@ export function run_script(js, this_obj=ctx) {
     }
   `), this_obj, [ctx]);
 }
+
+export function intercept_property(target, key, handler) {
+  let descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(target), key);
+  if (!descriptor) return;
+  Object.defineProperty(target, key, handler);
+  return descriptor;
+}

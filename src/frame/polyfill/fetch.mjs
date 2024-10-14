@@ -15,6 +15,8 @@ export async function fetch(resource, params={}) {
   if (params.body instanceof ReadableStream) {
     params.duplex = "half";
   }
+  if (params.signal) //abortsignal cant be cloned
+    delete params.signal;
 
   //figure out the request body
   let request_obj = new Request("http://127.0.0.1/", params);

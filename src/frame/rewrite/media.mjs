@@ -1,5 +1,4 @@
-import { ctx, convert_url } from "../context.mjs";
-import { intercept_property } from "./element.mjs";
+import { ctx, convert_url, intercept_property } from "../context.mjs";
 import * as network from "../network.mjs";
 import * as util from "../../util.mjs";
 
