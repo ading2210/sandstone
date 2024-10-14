@@ -53,7 +53,7 @@ export class ProxyFrame {
     this.url = null;
     this.id = Math.random() + "";
     this.iframe = document.createElement("iframe");
-    this.iframe.sandbox = "allow-scripts allow-forms allow-modals";
+    this.iframe.sandbox = "allow-scripts allow-forms allow-modals allow-pointer-lock";
     this.iframe.setAttribute("frame-id", this.id);
 
     iframes[this.id] = this;

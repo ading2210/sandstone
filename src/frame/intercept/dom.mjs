@@ -24,3 +24,13 @@ proxy_function(globalThis?.HTMLElement?.prototype, "replaceChild", (target, this
   handle_append(args[0]);
   return Reflect.apply(target, this_arg, args);
 })
+
+if (globalThis.Image) {
+  globalThis.Image = new Proxy(globalThis.Image, {
+    construct(target, args) {
+      let ret = Reflect.construct(target, args);
+      rewrite.element(ret);
+      return ret;
+    }
+  });
+}

@@ -1,7 +1,8 @@
 import { ctx } from "../context.mjs";
 
 const internal = {
-  currentScript: null
+  currentScript: null,
+  activeElement: null
 }
 
 class CustomDocument {
@@ -12,6 +13,8 @@ class CustomDocument {
   get URL() {return ctx.location.href}
   get currentScript() {return internal.currentScript}
   set currentScript(value) {internal.currentScript = value}
+  get activeElement() {return internal.activeElement || document.body}
+  set activeElement(value) {internal.activeElement = value;}
 
   createElement(tag_name, options) {
     return this.__target__.createElement(tag_name, options);

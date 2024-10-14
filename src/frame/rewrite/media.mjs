@@ -1,4 +1,4 @@
-import { ctx, convert_url, intercept_property } from "../context.mjs";
+import { ctx, convert_url, intercept_property, proxy_function } from "../context.mjs";
 import * as network from "../network.mjs";
 import * as util from "../../util.mjs";
 
@@ -10,16 +10,15 @@ export function rewrite_media(media_element) {
     return;
   }
 
-  if (!media_src || media_src.startsWith("data:") || media_src.startsWith("blob:")) {
-    return;
-  }
-  
-  //to lazy to parse srcset, so i'll just ignore it
-  if (media_element.getAttribute("srcset")) {
-    media_element.setAttribute("srcset", "");
-  }
-
   let media_url = "";
+  let fetch_src = async (value) => {
+    media_element.setAttribute("__src", value);
+    media_url = convert_url(value, ctx.location.href);
+    let response = await network.fetch(media_url);
+    let media_blob = await response.blob();
+    let blob_url = URL.createObjectURL(media_blob);
+    media_element.src = blob_url;
+  };
   let src_descriptor = intercept_property(media_element, "src", {
     get() {
       return media_url || src_descriptor.get.call(media_element);
@@ -32,15 +31,23 @@ export function rewrite_media(media_element) {
         fetch_src(value);
       }
     }
+  });
+  proxy_function(media_element, "setAttribute", (target, this_arg, args) => {
+    if (args[0] === "src")  {
+      media_element.src = args[1];
+      return;
+    }
+    return Reflect.apply(target, this_arg, args);
   })
-    
-  let fetch_src = async (value) => {
-    media_element.setAttribute("__src", value);
-    media_url = convert_url(value, ctx.location.href);
-    let response = await network.fetch(media_url);
-    let media_blob = await response.blob();
-    let blob_url = URL.createObjectURL(media_blob);
-    media_element.src = blob_url;
-  };
+
+  if (!media_src || media_src.startsWith("data:") || media_src.startsWith("blob:")) {
+    return;
+  }
+  
+  //to lazy to parse srcset, so i'll just ignore it
+  if (media_element.getAttribute("srcset")) {
+    media_element.setAttribute("srcset", "");
+  }
+
   media_element.src = media_src;
 }
