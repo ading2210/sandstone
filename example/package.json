@@ -5,7 +5,7 @@
   "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
-    "build": "npx inline-script-tags index.html bundled.html; npx inline-stylesheets bundled.html ."
+    "build": "node inline.mjs"
   },
   "dependencies": {
     "@mercuryworkshop/wisp-js": "^0.3.2",
