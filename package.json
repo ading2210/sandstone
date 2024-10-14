@@ -4,9 +4,9 @@
   "description": "",
   "main": "src/index.mjs",
   "scripts": {
-    "build": "webpack",
-    "build:prod": "webpack --mode=production",
-    "dev": "webpack --watch"
+    "build": "npx webpack",
+    "build:prod": "npx webpack --mode=production",
+    "dev": "npx webpack --watch"
   },
   "author": "ading2210",
   "license": "AGPL-3.0-only",
@@ -14,6 +14,7 @@
     "libcurl.js": "^0.6.16"
   },
   "devDependencies": {
-    "webpack": "^5.94.0"
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
   }
 }
