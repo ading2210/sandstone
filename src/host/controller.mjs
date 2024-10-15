@@ -7,7 +7,7 @@ import { version } from "./index.mjs";
 import { libcurl } from "libcurl.js/bundled";
 
 //frame_js is a string, which is imported using webpack
-import frame_js from "../../dist/frame.js";
+import frame_js from "../../dist/sandstone_frame.js";
 
 let frame_url = null;
 let frame_html = `
