@@ -42,7 +42,7 @@ function evaluate_scripts() {
     `;
     wrapped_scripts.push(script_part);
   }
-  run_script(wrapped_scripts.join("\n\n"));
+  run_script_safe(wrapped_scripts.join("\n\n"));
 }
 
 export function set_frame_id(id) {
@@ -142,7 +142,7 @@ async function get_favicon() {
 }
 
 function external_eval(js) {
-  run_script_safe(js);
+  return run_script(js);
 }
 
 rpc.rpc_handlers["html"] = load_html;

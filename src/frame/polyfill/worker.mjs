@@ -152,6 +152,7 @@ export class FakeWorker extends EventTarget {
       this["on" + event_name](event);
       let new_event = new event.constructor(event_name);
       wrap_obj(event, new_event);
+      console.log("DEBUG worker event", new_event);
       this.dispatchEvent(new_event);
     })
   }

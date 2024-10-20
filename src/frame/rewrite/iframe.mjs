@@ -49,7 +49,11 @@ export function rewrite_iframe(iframe_element) {
     let send_page = rpc.create_rpc_wrapper(rpc_target, "html");
 
     //load persisted local storage if needed
-    let local_storage = ctx.localStorage._get_entries();
+    let iframe_origin = new URL(iframe_url).origin;
+    let local_storage;
+    if (iframe_origin === ctx.location.origin)
+      local_storage = ctx.localStorage._get_entries();
+
     let frame_id = Math.random() + "";
     try {
       await send_page({

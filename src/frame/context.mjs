@@ -130,7 +130,12 @@ export function safe_script_template(js) {
 }
 
 export function run_script_safe(js, this_arg=ctx) {
-  run_script(safe_script_template(js), this_arg);
+  try {
+    run_script(safe_script_template(js), this_arg);
+  }
+  catch (e) {
+    console.error(e);
+  }
 }
 
 export function run_script(js, this_obj=ctx) {
@@ -138,7 +143,7 @@ export function run_script(js, this_obj=ctx) {
     with (globalThis) {
       ${js}
     }
-  `), this_obj, [ctx]);
+  `), this_obj, [this_obj]);
 }
 
 export function intercept_property(target, key, handler) {

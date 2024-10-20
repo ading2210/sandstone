@@ -177,3 +177,6 @@ rpc.rpc_handlers["local_storage"] = async (frame_id, entries) => {
     localStorage.setItem(persist_storage_key, JSON.stringify(local_storage));
   }
 }
+
+//this is for getting navigation events from form submission handlers
+window.addEventListener("message", rpc.message_listener);
