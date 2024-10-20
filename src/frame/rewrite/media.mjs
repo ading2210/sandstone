@@ -23,7 +23,6 @@ export function rewrite_media(media_element) {
 
     //if this is a source element for a media element, we should load the video
     if (media_element instanceof HTMLSourceElement) {
-      //debugger;
       let parent = media_element.parentNode;
       while (parent && !(parent instanceof HTMLVideoElement))
         parent = parent.parentNode;

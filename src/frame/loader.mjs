@@ -12,6 +12,8 @@ export const local_storage = rpc.create_rpc_wrapper(rpc.host, "local_storage");
 export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
 export let frame_id; //the current frame id
+export let frame_html; //the html for the frame runtime
+export let version; //the sandstone version
 export let is_loaded = false;
 
 function evaluate_scripts() {
@@ -50,9 +52,15 @@ export function set_url(_url) {
   url = _url;
 }
 
-async function load_html(options) {
-  //rpc.attach_host(new MessageChannel());
+function get_frame_html() {
+  let html = document.documentElement.outerHTML;
+  let doctype = new XMLSerializer().serializeToString(document.doctype);
+  frame_html = doctype + html;
+}
 
+async function load_html(options) {
+  get_frame_html();
+  version = options.version;
   network.known_urls[location.href] = options.url;
   network.enable_network();
   set_url(options.url);
@@ -63,7 +71,7 @@ async function load_html(options) {
     document.getElementById("loading_text").style.display = "none";
     document.getElementById("error_div").style.display = "initial";
     document.getElementById("error_msg").innerText = options.error;
-    document.getElementById("version_text").innerText = `Sandstone v${options.version.ver} (${options.version.hash})`;
+    document.getElementById("version_text").innerText = `Sandstone v${version.ver} (${version.hash})`;
     return;
   }
 

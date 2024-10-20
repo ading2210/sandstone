@@ -154,13 +154,17 @@ export function set_host(frame, msg_port) {
 function host_set_handler(event) {
   let msg = event.data;
   let msg_port = event.ports[0];
-  if (msg.type === "set_host") {
-    host.set_target(msg_port);
+  if (msg.type === "set_host" && msg_port) {
+    if (!host.target) {
+      host.set_target(msg_port);
+      on_attach();
+    }
+    else {
+      host.add_extra_target(msg_port);
+    }
     msg_port.start();
-    on_attach();
   }
 }
-
 
 export function set_role(value) {
   role = value;
@@ -173,5 +177,5 @@ export function set_on_attach(callback) {
 if (self.parent || typeof globalThis.importScripts === "function") {
   host = new RPCTarget();
   host.onmessage = message_listener;
-  self.addEventListener("message", host_set_handler, {once: true});
+  self.addEventListener("message", host_set_handler);
 }

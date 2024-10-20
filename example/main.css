@@ -40,6 +40,7 @@ a, a:hover, a:visited, a:active {
   width: 100%; 
   height: 120px;
   resize: none;
+  margin-top: -4px;
 }
 
 #address_bar {
@@ -50,6 +51,11 @@ a, a:hover, a:visited, a:active {
   border-radius: 1px;
 }
 
+#close_options_button {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 #url_box {
   flex-grow: 1;
 }
@@ -57,7 +63,6 @@ a, a:hover, a:visited, a:active {
 #frame_container {
   flex-grow: 1;
 }
-
 #frame_container iframe {
   width: 100%;
   height: 100%;

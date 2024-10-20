@@ -42,6 +42,7 @@ async function navigate_clicked() {
 
 function toggle_options() {
   options_div.style.display = options_div.style.display === "none" ? "flex" : "none";
+  frame_container.style.filter = frame_container.style.filter ? "" : "brightness(50%)";
   
   //apply options
   sandstone.libcurl.set_websocket(wisp_url_input.value);

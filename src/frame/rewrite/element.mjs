@@ -22,6 +22,8 @@ function rewrite_element_single(element) {
     promise = rewrite.script(element);
   else if (element instanceof HTMLFormElement)
     promise = rewrite.form(element);
+  else if (element instanceof HTMLIFrameElement)
+    promise = rewrite.iframe(element);
   let promises = [promise];
 
   //patch event handler attributes for all tags
