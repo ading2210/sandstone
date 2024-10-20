@@ -65,9 +65,11 @@ export class ProxyFrame {
     this.iframe.setAttribute("frame-id", this.id);
 
     iframes[this.id] = this;
-    this.send_page = rpc.create_rpc_wrapper(this.iframe, "html");
-    this.get_favicon = rpc.create_rpc_wrapper(this.iframe, "favicon");
-    this.eval_js = rpc.create_rpc_wrapper(this.iframe, "eval");
+    this.rpc_target = new rpc.RPCTarget();
+    this.rpc_target.onmessage = rpc.message_listener;
+    this.send_page = rpc.create_rpc_wrapper(this.rpc_target, "html");
+    this.get_favicon = rpc.create_rpc_wrapper(this.rpc_target, "favicon");
+    this.eval_js = rpc.create_rpc_wrapper(this.rpc_target, "eval");
 
     this.on_navigate = () => {};
     this.on_load = () => {};
@@ -87,6 +89,7 @@ export class ProxyFrame {
 
     console.log("navigating to", url);
     this.url = new URL(url);
+    
     this.iframe.style.backgroundColor = "#222222";
     this.on_navigate();
     this.iframe.src = get_frame_bundle();
@@ -114,6 +117,11 @@ export class ProxyFrame {
       wait_for_load(),
       download_html()
     ]))[1];
+
+    let msg_channel = new MessageChannel();
+    this.rpc_target.set_target(msg_channel.port1);
+    msg_channel.port1.start();
+    rpc.set_host(this.iframe, msg_channel.port2);
 
     //load persisted local storage if needed
     if (!local_storage && window.origin) {

@@ -6,8 +6,8 @@ import { custom_document } from "./intercept/document.mjs";
 import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
-export const navigate = rpc.create_rpc_wrapper("parent", "navigate");
-export const local_storage = rpc.create_rpc_wrapper("parent", "local_storage");
+export const navigate = rpc.create_rpc_wrapper(rpc.host, "navigate");
+export const local_storage = rpc.create_rpc_wrapper(rpc.host, "local_storage");
 
 export const runtime_src = self.document?.currentScript?.innerHTML;
 export let url; //the proxied page url
@@ -51,6 +51,8 @@ export function set_url(_url) {
 }
 
 async function load_html(options) {
+  //rpc.attach_host(new MessageChannel());
+
   network.known_urls[location.href] = options.url;
   network.enable_network();
   set_url(options.url);

@@ -3,11 +3,11 @@ import * as loader from "./loader.mjs";
 import * as util from "../util.mjs";
 import { ctx } from "./context.mjs";
 
-export const rpc_fetch = rpc.create_rpc_wrapper("parent", "fetch");
-export const rpc_ws_new = rpc.create_rpc_wrapper("parent", "ws_new");
-export const rpc_ws_event = rpc.create_rpc_wrapper("parent", "ws_event");
-export const rpc_ws_send = rpc.create_rpc_wrapper("parent", "ws_send");
-export const rpc_ws_close = rpc.create_rpc_wrapper("parent", "ws_close");
+export const rpc_fetch = rpc.create_rpc_wrapper(rpc.host, "fetch");
+export const rpc_ws_new = rpc.create_rpc_wrapper(rpc.host, "ws_new");
+export const rpc_ws_event = rpc.create_rpc_wrapper(rpc.host, "ws_event");
+export const rpc_ws_send = rpc.create_rpc_wrapper(rpc.host, "ws_send");
+export const rpc_ws_close = rpc.create_rpc_wrapper(rpc.host, "ws_close");
 
 export const known_urls = {};
 export const resource_cache = {};

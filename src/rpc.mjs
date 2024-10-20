@@ -1,8 +1,44 @@
 export let role = null;
 export const rpc_handlers = {};
 export const rpc_requests = {};
+export let host = null;
+export let on_attach = () => {};
 
-export let parent = self.parent ? self.parent : self;
+//a flexible wrapper for message ports
+export class RPCTarget {
+  constructor(target=null) {
+    this.target = null;
+    this.extra_targets = [];
+    this.msg_callback = this.handle_msg.bind(this);
+    this.onmessage = () => {};
+    if (target)
+      this.set_target(target);
+  }
+
+  set_target(new_target) {
+    if (this.target)
+      this.target.removeEventListener("message", this.msg_callback);
+    for (let target of this.extra_targets) {
+      target.removeEventListener("message", this.msg_callback);
+    }
+    this.target = new_target;
+    this.extra_targets = [];
+    this.target.addEventListener("message", this.msg_callback);
+  }
+
+  add_extra_target(target) {
+    target.addEventListener("message", this.msg_callback);
+    this.extra_targets.push(target);
+  }
+
+  handle_msg(event) {
+    this.onmessage(event, this);
+  }
+
+  postMessage(...args) {
+    this.target.postMessage(...args)
+  }
+}
 
 async function handle_procedure_call(msg) {
   if (!rpc_handlers[msg.procedure]) {
@@ -39,7 +75,7 @@ function handle_procedure_reply(msg) {
   delete rpc_requests[msg.id];
 }
 
-export async function message_listener(event) {
+export async function message_listener(event, target) {
   let msg = event.data;
   let source = event.source || event.currentTarget;
   if (typeof msg.type === "undefined") return;
@@ -55,13 +91,15 @@ export async function message_listener(event) {
   else if (msg.type === "reply") {
     handle_procedure_reply(msg);
   }
+  
   else if (msg.type === "attach") {
     let msg_port = event.ports[0];
     if (role === "frame") {
-      parent.postMessage(msg, {targetOrigin: "*", transfer: [msg_port]});
+      host.postMessage(msg, {targetOrigin: "*", transfer: [msg_port]});
     }
     else {
-      msg_port.onmessage = message_listener;
+      target.add_extra_target(msg_port);
+      msg_port.start();
     }
   }
 }
@@ -89,26 +127,51 @@ export async function call_procedure(target, procedure, args) {
 
 export function create_rpc_wrapper(target, procedure) {
   return function() {
-    let real_target = target === "parent" ? parent : target;
-    return call_procedure(real_target, procedure, [...arguments]);
+    return call_procedure(target, procedure, [...arguments]);
   }
 }
 
-export function set_role(value) {
-  role = value;
-}
-
-export function set_parent(msg_channel) {
+//attach an additional message port to the host
+export function attach_host(msg_port) {
   let msg = {
     type: "attach",
     id: Math.random() + ""
   };
-  parent.postMessage(msg, {targetOrigin: "*", transfer: [msg_channel.port1]});
-
-  parent.removeEventListener("message", message_listener);
-  parent = msg_channel.port2;
-  parent.addEventListener("message", message_listener);
-  parent.start();
+  host.postMessage(msg, {targetOrigin: "*", transfer: [msg_port]});
 }
 
-self.addEventListener("message", message_listener);
+//tell a child frame to set a message port as the host rpc target
+export function set_host(frame, msg_port) {
+  let msg = {
+    type: "set_host",
+    id: Math.random() + ""
+  };
+  let msg_target = frame.contentWindow || frame;
+  msg_target.postMessage(msg, {targetOrigin: "*", transfer: [msg_port]})
+}
+
+//handle the initial set_host message from the host
+function host_set_handler(event) {
+  let msg = event.data;
+  let msg_port = event.ports[0];
+  if (msg.type === "set_host") {
+    host.set_target(msg_port);
+    msg_port.start();
+    on_attach();
+  }
+}
+
+
+export function set_role(value) {
+  role = value;
+}
+export function set_on_attach(callback) {
+  on_attach = callback;
+}
+
+//create an rpc target for the host if we are in a child frame
+if (self.parent || typeof globalThis.importScripts === "function") {
+  host = new RPCTarget();
+  host.onmessage = message_listener;
+  self.addEventListener("message", host_set_handler, {once: true});
+}

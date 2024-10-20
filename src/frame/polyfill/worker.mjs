@@ -60,15 +60,17 @@ export class FakeWorker extends EventTarget {
       ${loader.runtime_src}
       sandstone_frame.loader.set_url("${loader.url}");
       sandstone_frame.loader.set_frame_id("${worker_id}");
-      sandstone_frame.rpc.set_parent(new MessageChannel());
       sandstone_frame.context.update_ctx();
-      sandstone_frame.context.run_script(${worker_js});
+      sandstone_frame.rpc.set_on_attach(() => {
+        sandstone_frame.context.run_script(${worker_js});
+      })
     `;
     let temp_blob = new Blob([temp_script], {type: "text/javascript"});
     let temp_blob_url = URL.createObjectURL(temp_blob);
 
     if (this.#terminated) return;
     let temp_worker = new Worker(temp_blob_url, this.#options);
+    this.#worker_attach(temp_worker);
     let recorded_urls = new Set();
     let terminate_worker;
     temp_worker.onmessage = (event) => {
@@ -113,15 +115,17 @@ export class FakeWorker extends EventTarget {
       ${cache_substr}
       sandstone_frame.loader.set_url(${JSON.stringify(loader.url)});
       sandstone_frame.loader.set_frame_id("${worker_id}");
-      sandstone_frame.rpc.set_parent(new MessageChannel());
       sandstone_frame.network.enable_network();
       sandstone_frame.context.update_ctx();
-      sandstone_frame.context.run_script(${worker_js});
+      sandstone_frame.rpc.set_on_attach(() => {
+        sandstone_frame.context.run_script(${worker_js});
+      })
     `;
     let real_blob = new Blob([real_script], {type: "text/javascript"});
     let real_blob_url = network.create_blob_url(real_blob, this.#url);
 
     this.#worker = new Worker(real_blob_url, this.#options);
+    this.#worker_attach(this.#worker);
     for (let event of ["error", "message", "messageerror"]) {
       this.#setup_listener(event);
     }
@@ -135,6 +139,12 @@ export class FakeWorker extends EventTarget {
     window.addEventListener("beforeunload", () => {
       this.terminate();
     }, null, true);
+  }
+
+  #worker_attach(worker) {
+    let msg_channel = new MessageChannel();
+    rpc.attach_host(msg_channel.port1);
+    rpc.set_host(worker, msg_channel.port2);
   }
 
   #setup_listener(event_name) {
