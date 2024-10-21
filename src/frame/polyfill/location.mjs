@@ -8,6 +8,7 @@ export class FakeLocation {
     
     for (let key in internal) {
       if (typeof key === "function") continue;
+      if (key === "toString") continue;
 
       Object.defineProperty(this, key, {
         get: () => {
@@ -34,5 +35,8 @@ export class FakeLocation {
   }
   reload() {
     this.assign(this.href);
+  }
+  toString() {
+    return this.href;
   }
 }

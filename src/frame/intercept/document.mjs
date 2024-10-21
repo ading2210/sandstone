@@ -19,6 +19,11 @@ class CustomDocument {
   createElement(tag_name, options) {
     return this.__target__.createElement(tag_name, options);
   }
+
+  createTreeWalker(root, whatToShow, filter) {
+    if (root === this) root = document.documentElement;
+    return document.createTreeWalker(root, whatToShow, filter);
+  }
 }
 
 export const custom_document = new CustomDocument();

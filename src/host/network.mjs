@@ -3,6 +3,7 @@ import { rpc_handlers } from "../rpc.mjs";
 import { libcurl } from "libcurl.js/bundled";
 
 export const ws_connections = {};
+export let session = null;
 
 export function set_websocket(url) {
   libcurl.set_websocket(url);
@@ -16,7 +17,7 @@ function get_ws(frame_id, ws_id) {
 
 //handle fetch api requests
 rpc_handlers["fetch"] = async function(url, options) {
-  let response = await libcurl.fetch(url, options);
+  let response = await session.fetch(url, options);
   let keys = ["ok", "redirected", "status", "statusText", "type", "url", "raw_headers"];
   let payload = {
     body: await response.blob(),
@@ -115,4 +116,5 @@ export function clean_ws_connections(id_to_clean) {
 
 libcurl.events.addEventListener("libcurl_load", () => {
   console.log(`libcurl.js v${libcurl.version.lib} loaded`);
+  session = new libcurl.HTTPSession({enable_cookies: true})
 });

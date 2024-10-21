@@ -1,7 +1,7 @@
 import * as network from "../network.mjs";
 import * as loader from "../loader.mjs";
 
-import { ctx, run_script_safe, convert_url, intercept_property } from "../context.mjs";
+import { ctx, run_script_safe, convert_url, intercept_property, get_global_vars } from "../context.mjs";
 
 export const pending_scripts = {};
 
@@ -38,7 +38,8 @@ export async function rewrite_script(script_element) {
 
   function run_script() {
     ctx.document.currentScript = script_element;
-    run_script_safe(script_text);
+    let full_script = script_text + get_global_vars(script_text);
+    run_script_safe(full_script);
     ctx.document.currentScript = null;
     script_element.dispatchEvent(new Event("load"));
   }

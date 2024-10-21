@@ -1,4 +1,5 @@
 import * as network from "./network.mjs";
+import * as loader from "./loader.mjs";
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 
@@ -98,6 +99,7 @@ export function update_ctx() {
   internal.history = new polyfill.FakeHistory();
   internal.localStorage = new polyfill.FakeStorage("local");
   internal.sessionStorage = new polyfill.FakeStorage("session");
+  delete globalThis.caches;
 
   //wrap function calls
   wrap_obj(ctx, globalThis);
@@ -134,16 +136,35 @@ export function run_script_safe(js, this_arg=ctx) {
     run_script(safe_script_template(js), this_arg);
   }
   catch (e) {
-    console.error(e);
+    if (e instanceof SyntaxError)
+      console.error(e, js);
+    else
+      console.error(e);
   }
 }
 
+
+export function get_global_vars(js) {
+  //a stub for now
+  return "";
+}
+
+
 export function run_script(js, this_obj=ctx) {
+  //indirect eval preserves global variables
+  return eval?.(`
+    with (sandstone_frame.context.ctx) {
+      ${js}
+    }
+  `);
+  
+  /*
   return Reflect.apply(Function("globalThis", `
     with (globalThis) {
       ${js}
     }
-  `), this_obj, [this_obj]);
+  `), this_obj, [this_obj]);  
+  */
 }
 
 export function intercept_property(target, key, handler) {

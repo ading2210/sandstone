@@ -3,7 +3,7 @@ import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
 import { custom_document } from "./intercept/document.mjs";
-import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
+import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url, get_global_vars } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(rpc.host, "navigate");
@@ -35,9 +35,10 @@ function evaluate_scripts() {
   
   let wrapped_scripts = [];
   for (let [script_id, script] of script_strings) {
+    let full_script = script + get_global_vars(script);
     let script_part = `
       document.currentScript = document.querySelector("script[__script_id='${script_id}']");
-      ${safe_script_template(script)}
+      ${safe_script_template(full_script)}
       document.currentScript = null;
     `;
     wrapped_scripts.push(script_part);
@@ -59,12 +60,13 @@ function get_frame_html() {
 }
 
 async function load_html(options) {
-  get_frame_html();
   version = options.version;
   network.known_urls[location.href] = options.url;
   network.enable_network();
+
   set_url(options.url);
   set_frame_id(options.frame_id);
+  get_frame_html();
   update_ctx();
 
   if (options.error) {
@@ -96,11 +98,17 @@ async function load_html(options) {
       element = element.parentElement;
     }
     if (!element) return;
-    
-    let original_href = convert_url(element.href, ctx.location.href);
-    navigate(frame_id, original_href);
+
     event.preventDefault();
     event.stopImmediatePropagation();
+
+    if (element.href.startsWith("javascript:")) {
+      run_script_safe(element.href.replace("javascript:", ""))
+    }
+    else {
+      let original_href = convert_url(element.href, ctx.location.href);
+      navigate(frame_id, original_href);  
+    }
   });
 
   //parse elements with ids and add them to the scope

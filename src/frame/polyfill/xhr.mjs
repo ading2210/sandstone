@@ -54,8 +54,13 @@ export class FakeXMLHttpRequest extends EventTarget {
       return;
     }
     target.dispatchEvent(event);
-    if (typeof target["on" + event.type] === "function")
-      target["on" + event.type](event);
+    try {
+      if (typeof target["on" + event.type] === "function")
+        target["on" + event.type](event);  
+    }
+    catch (e) {
+      console.error(e);
+    }
   } 
 
   //note: we can't really abort requests through the rpc interface
@@ -109,7 +114,7 @@ export class FakeXMLHttpRequest extends EventTarget {
           this.abort();
       }, this.timeout);
     }
-    this.#req_options.body = body;
+    this.#req_options.body = body || undefined;
 
     (async () => {
       try {

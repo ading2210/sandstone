@@ -104,7 +104,7 @@ export class ProxyFrame {
     }
     let download_html = async () => {
       try {
-        let response = await libcurl.fetch(url);
+        let response = await network.session.fetch(url);
         return [false, await response.text(), response.url];  
       }
       catch (error) {
