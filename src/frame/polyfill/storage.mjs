@@ -41,7 +41,7 @@ export class FakeStorage {
   }
 
   getItem(key) {
-    return this.#map.get(key+"");
+    return this.#map.get(key+"") || null;
   }
 
   setItem(key, value) {

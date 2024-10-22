@@ -46,7 +46,7 @@ let frame_html = `
 
 export const iframes = {};
 export const persist_storage_key = "proxy_local_storage";
-export let local_storage = {};
+export let local_storage = JSON.parse(localStorage.getItem(persist_storage_key));;
 
 function get_frame_bundle() {
   if (!frame_url) {
@@ -123,11 +123,6 @@ export class ProxyFrame {
     msg_channel.port1.start();
     rpc.set_host(this.iframe, msg_channel.port2);
 
-    //load persisted local storage if needed
-    if (!local_storage && window.origin) {
-      local_storage = JSON.parse(localStorage.getItem(persist_storage_key));
-    }
-
     this.url = new URL(final_url);
     try {
       await this.send_page({
@@ -171,7 +166,6 @@ rpc.rpc_handlers["navigate"] = async (frame_id, url, reload=true) => {
 rpc.rpc_handlers["local_storage"] = async (frame_id, entries) => {
   let frame = iframes[frame_id];
   if (!frame) return;
-  if (!frame.url.origin) debugger;
   local_storage[frame.url.origin] = entries;
   if (window.origin) {
     localStorage.setItem(persist_storage_key, JSON.stringify(local_storage));

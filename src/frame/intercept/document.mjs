@@ -11,6 +11,8 @@ class CustomDocument {
   get body() {return this.__target__.body}
   get location() {return ctx.location}
   get URL() {return ctx.location.href}
+  get baseURI() {return ctx.location.href}
+  get documentURI() {return ctx.location.href}
   get currentScript() {return internal.currentScript}
   set currentScript(value) {internal.currentScript = value}
   get activeElement() {return internal.activeElement || document.body}

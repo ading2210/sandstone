@@ -32,7 +32,8 @@ export function parse_css(css_str, css_url) {
   }
   return (async () => {
     let url_contents = await util.run_parallel(Object.values(requests));
-    url_contents.filter(item => item); //some requests may have failed
+    url_contents = url_contents.filter(item => item); //some requests may have failed
+    if (!url_contents) return replace_blobs(css_str, {});;
     let blobs = Object.fromEntries(url_contents);
     return replace_blobs(css_str, blobs);
   })();
@@ -42,6 +43,9 @@ function replace_blobs(css_str, blobs) {
   let count = 0;
   css_str = css_str.replaceAll(url_regex, (match, url) => {
     if (url.startsWith("data:") || url.startsWith("blob:")) {
+      return match;
+    }
+    if (!blobs[url]) {
       return match;
     }
     

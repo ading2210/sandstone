@@ -129,6 +129,9 @@ export class FakeWorker extends EventTarget {
     for (let event of ["error", "message", "messageerror"]) {
       this.#setup_listener(event);
     }
+    for (let [message, transfer] of this.#msg_queue) {
+      this.#worker.postMessage(message, transfer);
+    }
 
     //forward the attach message to the parent frame
     this.#worker.addEventListener("message", (event) => {
@@ -152,7 +155,6 @@ export class FakeWorker extends EventTarget {
       this["on" + event_name](event);
       let new_event = new event.constructor(event_name);
       wrap_obj(event, new_event);
-      console.log("DEBUG worker event", new_event);
       this.dispatchEvent(new_event);
     })
   }

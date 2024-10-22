@@ -47,6 +47,13 @@ export function rewrite_media(media_element) {
       }
     }
   });
+
+  media_element.addEventListener("error", (event) =>  {
+    if (src_descriptor.get.call(media_element) === "") {
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
   proxy_function(media_element, "setAttribute", (target, this_arg, args) => {
     if (args[0] === "src")  {
       media_element.src = args[1];

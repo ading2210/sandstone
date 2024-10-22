@@ -8,8 +8,7 @@ Sandstone is an experimental web proxy utilizing sandboxed iframes and no servic
 - Every proxied page runs in a sandboxed iframe
 - Can be used from an HTML file or as a data URL
 - Does not use service workers
-- Does not use JS rewriting
-- Only client dependency is [libcurl.js](https://www.npmjs.com/package/libcurl.js)
+- Uses [libcurl.js](https://www.npmjs.com/package/libcurl.js) and [Wisp](https://github.com/MercuryWorkshop/wisp-protocol) for end-to-end encryption
 
 ## Site Support
 - Discord

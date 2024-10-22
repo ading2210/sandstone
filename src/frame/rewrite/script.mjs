@@ -1,7 +1,8 @@
 import * as network from "../network.mjs";
 import * as loader from "../loader.mjs";
+import * as parser from "../parser.mjs";
 
-import { ctx, run_script_safe, convert_url, intercept_property, get_global_vars } from "../context.mjs";
+import { ctx, run_script_safe, convert_url, intercept_property } from "../context.mjs";
 
 export const pending_scripts = {};
 
@@ -31,6 +32,7 @@ export async function rewrite_script(script_element) {
   script_element.removeAttribute("src");
 
   async function download_src() {
+    script_element.setAttribute("__src", script_url);
     let src_url = convert_url(script_url, ctx.location.href);
     let response = await network.fetch(src_url);
     script_text = await response.text();
@@ -38,8 +40,8 @@ export async function rewrite_script(script_element) {
 
   function run_script() {
     ctx.document.currentScript = script_element;
-    let full_script = script_text + get_global_vars(script_text);
-    run_script_safe(full_script);
+    let rewritten_js = parser.rewrite_js(script_text);
+    run_script_safe(rewritten_js);
     ctx.document.currentScript = null;
     script_element.dispatchEvent(new Event("load"));
   }

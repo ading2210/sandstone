@@ -1,9 +1,10 @@
 import * as rpc from "../rpc.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
+import * as parser from "./parser.mjs";
 
 import { custom_document } from "./intercept/document.mjs";
-import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url, get_global_vars } from "./context.mjs";
+import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
 import { should_load, pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(rpc.host, "navigate");
@@ -29,16 +30,16 @@ function evaluate_scripts() {
       delete pending_scripts[script_id];
     }
     else if (should_load(script_element)) {
-      script_strings.push([script_id, script_element.innerHTML]);
+      script_strings.push(["", script_element.innerHTML]);
     }
   }
   
   let wrapped_scripts = [];
   for (let [script_id, script] of script_strings) {
-    let full_script = script + get_global_vars(script);
+    let rewritten_js = parser.rewrite_js(script);
     let script_part = `
       document.currentScript = document.querySelector("script[__script_id='${script_id}']");
-      ${safe_script_template(full_script)}
+      ${safe_script_template(rewritten_js)}
       document.currentScript = null;
     `;
     wrapped_scripts.push(script_part);

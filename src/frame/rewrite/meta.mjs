@@ -1,13 +1,8 @@
 import { ctx, convert_url } from "../context.mjs";
 import * as loader from "../loader.mjs";
 
-export function rewrite_meta(meta_element) {
-  if (!meta_element.getAttribute("http-equiv")) 
-    return;
-  if (meta_element.getAttribute("http-equiv") !== "refresh")
-    return;
-
-  meta_element.setAttribute("http-equiv", "");
+function rewrite_refresh(meta_element) {
+  meta_element.setAttribute("http-equiv", "__refresh");
   let content = meta_element.getAttribute("content");
   if (!content) return;
 
@@ -23,4 +18,20 @@ export function rewrite_meta(meta_element) {
   setTimeout(() => {
     loader.navigate(loader.frame_id, url);
   }, parseInt(timeout) * 1000);
+}
+
+function rewrite_csp(meta_element) {
+  meta_element.setAttribute("http-equiv", "__content-security-policy");
+}
+
+export function rewrite_meta(meta_element) {
+  let http_equiv = meta_element.getAttribute("http-equiv");
+  if (!http_equiv) 
+    return;
+  http_equiv = http_equiv.trim().toLowerCase();
+
+  if (http_equiv === "refresh")
+    rewrite_refresh(meta_element);
+  else if (http_equiv === "content-security-policy")
+    rewrite_csp(meta_element);
 }

@@ -65,7 +65,9 @@ export class WebSocket extends EventTarget {
   constructor(url, protocols=[]) {
     super();
 
-    this.url = url;
+    let url_obj = new URL(url, ctx.location.href);
+    url_obj.protocol = url_obj.protocol.replace("http", "ws");
+    this.url = url_obj.href;
     this.protocols = protocols;
     this.binaryType = "blob";
     this.bufferedAmount = 0;
@@ -88,7 +90,11 @@ export class WebSocket extends EventTarget {
 
   async #connect() {
     this.#ws_id = await rpc_ws_new(loader.frame_id, this.url, this.protocols, {
-      headers: {"Origin": ctx.location.origin}
+      headers: {
+        "Origin": ctx.location.origin,
+        "User-Agent": navigator.userAgent,
+      },
+      verbose: 1
     });
     this.#event_loop();
   }

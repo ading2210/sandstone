@@ -1,6 +1,6 @@
 {
   "name": "sandstone-proxy",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "An experimental web proxy utilizing sandboxed iframes and no service worker.",
   "bugs": {
     "url": "https://github.com/ading2210/sandstone/issues"
@@ -15,7 +15,8 @@
     "dev": "npx webpack --watch"
   },
   "dependencies": {
-    "libcurl.js": "^0.6.16"
+    "libcurl.js": "^0.6.16",
+    "meriyah": "^6.0.2"
   },
   "devDependencies": {
     "terser-webpack-plugin": "^5.3.10",

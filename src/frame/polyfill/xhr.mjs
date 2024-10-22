@@ -98,7 +98,7 @@ export class FakeXMLHttpRequest extends EventTarget {
     this.#req_url.username = user || "";
     this.#req_url.password = password || "";
     this.#req_options.headers = {};
-    this.#req_options.method = method;
+    this.#req_options.method = method.toUpperCase();
   }
 
   overrideMimeType(mime_type) {

@@ -24,6 +24,10 @@ rpc_handlers["fetch"] = async function(url, options) {
     headers: [],
     items: {}
   };
+  if (payload.body.type.includes(";")) {
+    let mime_type = payload.body.type.split(";")[0].trim();
+    payload.body = new Blob([payload.body], {type: mime_type});
+  }
   for (let key of keys) {
     payload.items[key] = response[key];
   }

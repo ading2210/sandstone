@@ -59,3 +59,8 @@ export function url_is_http(url) {
   let url_obj = new URL(url, "http://example.com/");
   return url_obj.protocol === "http:" || url_obj.protocol === "https:";
 }
+
+export function round_float(num, digits) {
+  let multiplier = Math.pow(10, digits);
+  return Math.round(num * multiplier) / multiplier;
+}

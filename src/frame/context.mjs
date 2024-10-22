@@ -143,13 +143,6 @@ export function run_script_safe(js, this_arg=ctx) {
   }
 }
 
-
-export function get_global_vars(js) {
-  //a stub for now
-  return "";
-}
-
-
 export function run_script(js, this_obj=ctx) {
   //indirect eval preserves global variables
   return eval?.(`
