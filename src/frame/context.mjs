@@ -145,19 +145,20 @@ export function run_script_safe(js, this_arg=ctx) {
 
 export function run_script(js, this_obj=ctx) {
   //indirect eval preserves global variables
+  /*
   return eval?.(`
     with (sandstone_frame.context.ctx) {
       ${js}
     }
   `);
+  */
   
-  /*
   return Reflect.apply(Function("globalThis", `
     with (globalThis) {
       ${js}
     }
   `), this_obj, [this_obj]);  
-  */
+  
 }
 
 export function intercept_property(target, key, handler) {

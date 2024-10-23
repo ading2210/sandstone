@@ -11,8 +11,9 @@ Sandstone is an experimental web proxy utilizing sandboxed iframes and no servic
 - Uses [libcurl.js](https://www.npmjs.com/package/libcurl.js) and [Wisp](https://github.com/MercuryWorkshop/wisp-protocol) for end-to-end encryption
 
 ## Site Support
-- Discord
+- [Discord](https://discord.com/app)
   - The login page does work, but not the captcha
+- [v86](https://copy.sh/v86/)
 - Most static sites
 
 ## Status

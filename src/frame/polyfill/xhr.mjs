@@ -107,6 +107,8 @@ export class FakeXMLHttpRequest extends EventTarget {
 
   send(body) {
     console.log("DEBUG XHR.send", this, body);
+    if (this.#req_options.method === "GET")
+      body = undefined;
 
     if (this.timeout) {
       setTimeout(() => {

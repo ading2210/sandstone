@@ -49,7 +49,7 @@ export function rewrite_media(media_element) {
   });
 
   media_element.addEventListener("error", (event) =>  {
-    if (src_descriptor.get.call(media_element) === "") {
+    if (!src_descriptor || src_descriptor.get.call(media_element) === "") {
       event.stopImmediatePropagation();
     }
   }, true);
