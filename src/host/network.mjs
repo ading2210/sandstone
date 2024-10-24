@@ -17,13 +17,13 @@ function get_ws(frame_id, ws_id) {
 
 //handle fetch api requests
 rpc_handlers["fetch"] = async function(url, options) {
-  let response = await session.fetch(url, options);
-  let keys = ["ok", "redirected", "status", "statusText", "type", "url", "raw_headers"];
-  let payload = {
+  var response = await session.fetch(url, options);
+  var keys = ["ok", "redirected", "status", "statusText", "type", "url", "raw_headers"];
+  var payload = {
     body: await response.blob(),
     headers: [],
     items: {}
-  };
+  };  
   if (payload.body.type.includes(";")) {
     let mime_type = payload.body.type.split(";")[0].trim();
     payload.body = new Blob([payload.body], {type: mime_type});

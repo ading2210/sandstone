@@ -1,65 +1,95 @@
 import * as util from "../util.mjs";
 
 import * as meriyah from "meriyah";
+import * as astray from 'astray';
 
 let total_time = 0;
 
-function recurse_script_body(body, top_level=false) {
-  let found_vars = [];
-  if (!body) return found_vars;
-  if (body.body)
-    return recurse_script_body(body.body);
+class ASTVisitor {
+  constructor(ast) {
+    this.ast = ast;
+    this.rewrites = [];
+    this.block_depth = 0;
+    this.function_depth = 0;
+    this.for_init = false;
 
-  for (let node of body) {
-    if (node.type === "VariableDeclaration") {
-      for (let decl of node.declarations) {
-        if (!top_level && node.kind !== "var") continue;
-        found_vars.push([decl.id.name, node.end]);
-      }
-    }
-    else if (node.type === "ExpressionStatement") {
-      if (!node.expression.left) continue;
-      if (!node.expression.left.type === "Identifier") continue;
-      found_vars.push([node.expression.left.name, node.end]);
-    }
-    else if (node.type === "FunctionDeclaration") {
-      found_vars.push([node.id.name, node.end]);
-    }
-    else if (node.type === "ClassDeclaration") {
-      found_vars.push([node.id.name, node.end]);
-    }
-    else if (node.type === "BlockStatement") {
-      let vars = recurse_script_body(node.body);
-      found_vars.push(...vars);
-    }
-    else if (node.type === "TryStatement") {
-      found_vars.push(...recurse_script_body(node.block.body));
-      found_vars.push(...recurse_script_body(node.handler.body.body));
-    }
-    
-    if (node.consequent) {
-      found_vars.push(...recurse_script_body(node.consequent.body));
-    }
-    if (node.alternate) {
-      found_vars.push(...recurse_script_body(node.alternate.body));
+    this.create_handler("FunctionDeclaration");
+    this.create_handler("BlockStatement");
+    this.create_handler("ClassDeclaration");
+    this.create_handler("VariableDeclaration");
+    this.create_handler("ForStatement");
+  }
+
+  create_handler(type) {
+    this[type] = {
+      enter: this[type + "_Enter"]?.bind(this),
+      exit: this[type + "_Exit"]?.bind(this)
     }
   }
 
-  return found_vars;
+  FunctionDeclaration_Enter() {
+    this.function_depth++;
+  }
+  FunctionDeclaration_Exit(node) {
+    this.function_depth--;
+    if (this.block_depth === 0)
+      this.rewrites.push({type: "var", pos: node.end, name: node.id.name});
+  }
+
+  BlockStatement_Enter() {
+    this.block_depth++;
+    if (this.for_init) 
+      this.for_init = false;
+  }
+  BlockStatement_Exit() {
+    this.block_depth--;
+  }
+
+  ForStatement_Enter() {
+    this.for_init = true;
+  }
+
+  ClassDeclaration_Exit(node) {
+    if (this.block_depth === 0)
+      this.rewrites.push({type: "var", pos: node.end, name: node.id.name});
+  }
+
+  ExpressionStatement_Exit(node) {
+    if (!node.expression.left) 
+      return;
+    if (!node.expression.left.type === "Identifier") 
+      return;
+    this.rewrites.push({type: "var", pos: node.end, name: node.expression.left.name});
+  }
+
+  VariableDeclaration_Exit(node) {
+    if (this.for_init) 
+      return;
+    if (this.block_depth !== 0 && this.function_depth !== 0) 
+      return;
+    for (let decl of node.declarations) {
+      if (this.block_depth !== 0 && node.kind !== "var") 
+        continue;
+      this.rewrites.push({type: "var", pos: node.end, name: decl.id.name});
+    }
+  }
 }
 
 export function rewrite_js(js) {
   let start = performance.now();
-  let parsed_script = meriyah.parse(js, {ranges: true, webcompat: true});
-  let found_vars = recurse_script_body(parsed_script.body, true);
+  let ast = meriyah.parse(js, {ranges: true, webcompat: true});
+  let ast_visitor = new ASTVisitor(ast);
+  astray.walk(ast, ast_visitor);
 
   let rewritten_js = "";
-  if (found_vars) {
+  if (ast_visitor.rewrites) {
     let prev_offset = 0;
-    for (let [identifier, offset] of found_vars) {
-      rewritten_js += js.substring(prev_offset, offset);
-      rewritten_js += `; if (typeof ${identifier} !== "undefined") {globalThis.${identifier} = ${identifier}}; `;
-      prev_offset = offset;
+    for (let rewrite of ast_visitor.rewrites) {
+      rewritten_js += js.substring(prev_offset, rewrite.pos);
+      if (rewrite.type === "var") {
+        rewritten_js += `; if (typeof ${rewrite.name} !== "undefined") {__ctx__.${rewrite.name} = ${rewrite.name}}; `;
+      }
+      prev_offset = rewrite.pos;
     }
     rewritten_js += js.substring(prev_offset);
   }

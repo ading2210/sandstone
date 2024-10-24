@@ -15,7 +15,8 @@
     "dev": "npx webpack --watch"
   },
   "dependencies": {
-    "libcurl.js": "^0.6.16",
+    "astray": "^1.1.1",
+    "libcurl.js": "^0.6.17",
     "meriyah": "^6.0.2"
   },
   "devDependencies": {

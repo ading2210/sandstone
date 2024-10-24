@@ -46,7 +46,11 @@ let frame_html = `
 
 export const iframes = {};
 export const persist_storage_key = "proxy_local_storage";
-export let local_storage = JSON.parse(localStorage.getItem(persist_storage_key));;
+export let local_storage = {};
+try {
+  local_storage = JSON.parse(localStorage.getItem(persist_storage_key)) || {};
+}
+catch {}
 
 function get_frame_bundle() {
   if (!frame_url) {

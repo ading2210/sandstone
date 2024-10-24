@@ -1,5 +1,4 @@
 import * as network from "./network.mjs";
-import * as loader from "./loader.mjs";
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 
@@ -153,12 +152,11 @@ export function run_script(js, this_obj=ctx) {
   `);
   */
   
-  return Reflect.apply(Function("globalThis", `
-    with (globalThis) {
+  return Reflect.apply(Function("__ctx__", `
+    with (__ctx__) {
       ${js}
     }
   `), this_obj, [this_obj]);  
-  
 }
 
 export function intercept_property(target, key, handler) {
