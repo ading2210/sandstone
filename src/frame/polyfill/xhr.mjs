@@ -180,7 +180,7 @@ export class FakeXMLHttpRequest extends EventTarget {
       return null;
     if (this.#response_data === null) 
       throw new DOMException("InvalidStateError");
-    return new DOMParser().parseFromString(this.responseText, this.#mime_type);
+    return new DOMParser().parseFromString(this.responseText, this.#mime_type || "text/html");
   }
 
   get status() {

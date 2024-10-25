@@ -24,7 +24,9 @@ class CustomCTX {
 
   get window() {return this}
   get origin() {return this.location.origin}
-  get document() {return is_worker ? undefined : intercept.document} 
+  get document() {return is_worker ? undefined : intercept.document}
+  get parent() {return this}
+  get top() {return this}
 
   fetch() {return polyfill.fetch(...arguments)}
   get URL() {return polyfill.FakeURL}
@@ -36,6 +38,12 @@ class CustomCTX {
   get localStorage() {return internal.localStorage}
   get sessionStorage() {return internal.sessionStorage}
   get WebSocket() {return network.WebSocket}
+
+  __get_this__(this_obj) {
+    if (this_obj === globalThis)
+      return this;
+    return this_obj;
+  }
 }
 
 export const ctx = new CustomCTX();
@@ -122,7 +130,7 @@ export function convert_url(url, base) {
 export function safe_script_template(js) {
   return `
     try {
-      ${js}
+      (()=>{${js}})();
     }
     catch (__e__) {
       console.error(__e__);
