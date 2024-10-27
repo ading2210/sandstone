@@ -45,6 +45,10 @@ function evaluate_scripts() {
     wrapped_scripts.push(script_part);
   }
   run_script_safe(wrapped_scripts.join("\n\n"));
+
+  for (let script_element of script_elements) {
+    script_element.dispatchEvent(new Event("load"));
+  }
 }
 
 export function set_frame_id(id) {
@@ -104,7 +108,9 @@ async function load_html(options) {
     event.stopImmediatePropagation();
 
     if (element.href.startsWith("javascript:")) {
-      run_script_safe(element.href.replace("javascript:", ""))
+      let original_js = element.href.replace("javascript:", "");
+      let rewritten_js = parser.rewrite_js(original_js);
+      run_script_safe(rewritten_js)
     }
     else {
       let original_href = convert_url(element.href, ctx.location.href);
@@ -130,6 +136,7 @@ async function load_html(options) {
   //trigger load events
   is_loaded = true;
   ctx.document.dispatchEvent(new Event("DOMContentLoaded"));
+  ctx.document.dispatchEvent(new Event("readystatechange"));
   ctx.document.dispatchEvent(new Event("load"));
   ctx.dispatchEvent(new Event("load"));
 }

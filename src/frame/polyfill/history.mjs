@@ -15,6 +15,7 @@ export class FakeHistory {
   go() {}
   
   pushState(state, unused, url) {
+    if (!url) return;
     this.#state = state;
     this.#url = url;
     let full_url = convert_url(url, ctx.location.href);

@@ -1,5 +1,6 @@
 import * as network from "../network.mjs";
 import * as loader from "../loader.mjs";
+import * as parser from "../parser.mjs";
 import * as rpc from "../../rpc.mjs";
 import * as util from "../../util.mjs";
 import { wrap_obj, run_script_safe, convert_url } from "../context.mjs";
@@ -12,7 +13,8 @@ export function fakeImportScripts(...paths) {
   if (network.requests_allowed) {
     for (let url of script_urls) {
       if (typeof network.resource_cache[url] === "string") {
-        run_script_safe(network.resource_cache[url]);
+        let rewritten_js = parser.rewrite_js(network.resource_cache[url]);
+        run_script_safe(rewritten_js);
       }
       else if (network.resource_cache[url] === false) {
         throw Error("Script network request failed");
@@ -20,7 +22,10 @@ export function fakeImportScripts(...paths) {
       else {
         //cache miss - try to load the script async anyways
         console.warn("WARN importScripts cache miss for", url);
-        network.fetch(url).then(r => r.text()).then(run_script_safe)
+        network.fetch(url).then(r => r.text()).then((js) => {
+          let rewritten_js = parser.rewrite_js(js);
+          run_script_safe(rewritten_js);
+        })
       }
     }
   }

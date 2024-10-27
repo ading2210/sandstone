@@ -24,7 +24,7 @@ class CustomDocument {
 
   createTreeWalker(root, whatToShow, filter) {
     if (root === this) root = document.documentElement;
-    return document.createTreeWalker(root, whatToShow, filter);
+    return this.__target__.createTreeWalker(root, whatToShow, filter);
   }
 }
 

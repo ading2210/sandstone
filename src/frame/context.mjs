@@ -130,7 +130,9 @@ export function convert_url(url, base) {
 export function safe_script_template(js) {
   return `
     try {
-      (()=>{${js}})();
+      (()=>{
+        ${js}
+      })();
     }
     catch (__e__) {
       console.error(__e__);
@@ -164,7 +166,7 @@ export function run_script(js, this_obj=ctx) {
     with (__ctx__) {
       ${js}
     }
-  `), this_obj, [this_obj]);  
+  `), this_obj, [ctx]);  
 }
 
 export function intercept_property(target, key, handler) {
