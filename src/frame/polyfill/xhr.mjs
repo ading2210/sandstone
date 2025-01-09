@@ -144,8 +144,10 @@ export class FakeXMLHttpRequest extends EventTarget {
   }
 
   set readyState(value) {
-    this.#ready_state = value;
-    this.#emit_event(new Event("readystatechange"))
+    if (value !== this.#ready_state) {
+      this.#ready_state = value;
+      this.#emit_event(new Event("readystatechange"))  
+    }
   }
 
   get readyState() {

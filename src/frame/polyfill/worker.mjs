@@ -169,7 +169,8 @@ export class FakeWorker extends EventTarget {
   }
 
   terminate() {
-    this.#worker.terminate();
+    if (this.#worker)
+      this.#worker.terminate();
     this.#terminated = true;
   }
 }

@@ -4,7 +4,7 @@ import * as util from "../../util.mjs";
 
 export function rewrite_media(media_element) {
   let media_src = media_element.src;
-
+  
   //ensure there is only one source element in a video tag
   if (media_element instanceof HTMLVideoElement) {
     let source = media_element.querySelector("source[src]");
@@ -61,15 +61,15 @@ export function rewrite_media(media_element) {
     }
     return Reflect.apply(target, this_arg, args);
   })
-
-  if (!media_src || media_src.startsWith("data:") || media_src.startsWith("blob:")) {
-    return;
-  }
   
   //to lazy to parse srcset, so i'll just ignore it
   if (media_element.getAttribute("srcset")) {
     media_element.setAttribute("srcset", "");
   }
 
+  if (!media_src || media_src.startsWith("data:") || media_src.startsWith("blob:")) {
+    return;
+  }
+  
   media_element.src = media_src;
 }

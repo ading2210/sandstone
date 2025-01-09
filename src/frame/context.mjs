@@ -2,6 +2,7 @@ import * as network from "./network.mjs";
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
 import * as parser from "./parser.mjs";
+import * as loader from "./loader.mjs";
 
 export const is_worker = typeof importScripts === "function";
 export const ctx_vars = [];
@@ -44,12 +45,17 @@ export function get_handler_keys(obj) {
 }
 
 export function create_obj_proxy(obj, ctx_vars, target) {
+  let proxies = new Map();
+
   return new Proxy(target, {
     get: (_, key) => {
       if (typeof obj[key] !== "undefined")
         return obj[key];
-      if (typeof target[key] === "function" && !target[key].prototype) 
-        return create_func_proxy(target, target[key]);
+      if (typeof target[key] === "function" && !target[key].prototype) {
+        if (!proxies.has(key)) 
+          proxies.set(key, create_func_proxy(target, target[key]))
+        return proxies.get(key)
+      }
       return target[key];
     },
     set: (_, key, value) => {
@@ -79,8 +85,16 @@ export class CustomCTX {
   get window() {return this.__proxy__}
   get origin() {return this.location.origin}
   get document() {return is_worker ? undefined : intercept.document.__proxy__}
-  get parent() {return this.__proxy__}
-  get top() {return this.__proxy__}
+  get parent() {
+    if (loader.is_iframe)
+      return globalThis.parent;
+    return this.__proxy__
+  }
+  get top() {
+    if (loader.is_iframe)
+      return globalThis.parent;
+    return this.__proxy__
+  }
 
   fetch() {return polyfill.fetch(...arguments)}
   get URL() {return polyfill.FakeURL}
@@ -92,6 +106,10 @@ export class CustomCTX {
   get localStorage() {return internal.localStorage}
   get sessionStorage() {return internal.sessionStorage}
   get WebSocket() {return network.WebSocket}
+
+  eval(js) {
+    return run_script(String(js));
+  }
 
   __get_this__(this_obj) {
     if (this_obj === globalThis)
@@ -162,31 +180,6 @@ export function update_ctx() {
   internal.sessionStorage = new polyfill.FakeStorage("session");
   delete globalThis.caches;
 
-  /*
-  console.error = new Proxy(console.error, {
-    apply(target, this_arg, args) {
-      let ret = Reflect.apply(target, this_arg, args);
-      debugger;
-      return ret;
-    }
-  })
-  */
- 
-  //wrap function calls
-  //wrap_obj(ctx, globalThis);
-  /*
-  delete ctx.eval;
-
-  //wrap window events
-  for (let key of Reflect.ownKeys(globalThis)) {
-    if (!key.startsWith("on")) continue;
-    Object.defineProperty(ctx, key, {
-      get: () => {return globalThis[key]},
-      set: (value) => {globalThis[key] = value}
-    });
-  }
-  */
-
   globalThis.__ctx__ = ctx.__proxy__;
   globalThis.__get_this__ = ctx.__get_this__;
 }
@@ -194,19 +187,6 @@ export function update_ctx() {
 export function convert_url(url, base) {
   let url_obj = new URL(url, base);
   return url_obj.href;
-}
-
-export function safe_script_template(js) {
-  return `
-    try {
-      (()=>{
-        ${js}
-      })();
-    }
-    catch (__e__) {
-      console.error(__e__);
-    }
-  `;
 }
 
 export function run_script_safe(js) {
@@ -221,22 +201,7 @@ export function run_script_safe(js) {
 export function run_script(js) {
   //indirect eval preserves global variables
   let rewritten_js = parser.rewrite_js(js);
-  if (!globalThis.document || !globalThis.document.body) {
-    eval?.(rewritten_js);
-    return;
-  }
-  try {
-    let script = document.createElement("script");
-    script.setAttribute("__no_rewrite__", "1");
-    script.innerHTML = rewritten_js;
-    document.body.append(script);
-    script.remove();
-  }
-  catch (e) {
-    if (e instanceof SyntaxError)
-      console.error(e, rewritten_js);
-    throw e;
-  }
+  return eval?.(rewritten_js);
 }
 
 export function intercept_property(target, key, handler) {

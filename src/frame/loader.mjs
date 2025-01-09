@@ -2,9 +2,8 @@ import * as rpc from "../rpc.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
 
-import { custom_document } from "./intercept/document.mjs";
-import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
-import { should_load, pending_scripts } from "./rewrite/script.mjs";
+import { update_ctx, run_script, run_script_safe, ctx, convert_url } from "./context.mjs";
+import { pending_scripts } from "./rewrite/script.mjs";
 
 export const navigate = rpc.create_rpc_wrapper(rpc.host, "navigate");
 export const local_storage = rpc.create_rpc_wrapper(rpc.host, "local_storage");
@@ -15,11 +14,13 @@ export let frame_id; //the current frame id
 export let frame_html; //the html for the frame runtime
 export let version; //the sandstone version
 export let is_loaded = false;
+export let is_iframe = false;
 
 function eval_script(script_element, script_text) {
   ctx.document.currentScript = script_element;
   run_script_safe(script_text);
   ctx.document.currentScript = null;
+  script_element.dispatchEvent(new Event("load"));
 }
 
 function evaluate_scripts() {
@@ -38,33 +39,6 @@ function evaluate_scripts() {
   for (let [script_element, script_text] of deferred) {
     eval_script(script_element, script_text);
   }
-
-  return;
-  let script_elements = document.getElementsByTagName("script");
-  let script_strings = [];
-
-  for (let i = 0; i < script_elements.length; i++) {
-    let script_element = script_elements[i];
-
-    if (script_element.hasAttribute("__script_id")) {
-      let script_id = script_element.getAttribute("__script_id");
-      script_strings.push([script_id, pending_scripts[script_id]]);
-      delete pending_scripts[script_id];
-    }
-    else if (should_load(script_element)) {
-      script_strings.push(["", script_element.innerHTML]);
-    }
-  }
-  
-  for (let [script_id, script] of script_strings) {
-    ctx.document.currentScript = document.querySelector(`script[__script_id='${script_id}']`);
-    run_script_safe(script);
-    ctx.document.currentScript = null;
-  }
-
-  for (let script_element of script_elements) {
-    script_element.dispatchEvent(new Event("load"));
-  }
 }
 
 export function set_frame_id(id) {
@@ -82,6 +56,7 @@ function get_frame_html() {
 
 async function load_html(options) {
   version = options.version;
+  is_iframe = options.is_iframe || false;
   network.known_urls[location.href] = options.url;
   network.enable_network();
 
@@ -129,6 +104,13 @@ async function load_html(options) {
     }
     else {
       let original_href = convert_url(element.href, ctx.location.href);
+      let url = new URL(original_href);
+      if (url.pathname === location.pathname) {
+        let element_id = url.hash.substring(1);
+        let element = document.getElementById(element_id);
+        if (element) element.scrollIntoView({behavior: "instant"});
+        return;
+      }
       navigate(frame_id, original_href);  
     }
   });
@@ -145,7 +127,6 @@ async function load_html(options) {
   //apply the rewritten html
   console.log("done downloading page");
   document.documentElement.replaceWith(html.documentElement);
-  //wrap_obj(custom_document, document);
   evaluate_scripts();
 
   //trigger load events

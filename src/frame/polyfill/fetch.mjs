@@ -10,6 +10,10 @@ export async function fetch(resource, params={}) {
     params.body = params.body || await resource.blob();
     params.headers = params.headers || Object.fromEntries(resource.headers);
     params.method = params.method || resource.method;
+
+    if (params.body.size === 0) {
+      delete params.body;
+    }
   }
   url = (new URL(url, ctx.location.href)).href;
   if (params.body instanceof ReadableStream) {

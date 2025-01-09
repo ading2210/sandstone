@@ -62,7 +62,8 @@ export function rewrite_iframe(iframe_element) {
         frame_id: frame_id,
         error: error,
         local_storage: local_storage,
-        version: loader.version
+        version: loader.version,
+        iframe: true
       });
     }
     catch (error) {
