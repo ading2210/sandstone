@@ -1,4 +1,4 @@
-import { ctx } from "../context.mjs";
+import { ctx, get_handler_keys, create_obj_proxy } from "../context.mjs";
 
 const internal = {
   currentScript: null,
@@ -6,6 +6,14 @@ const internal = {
 }
 
 class CustomDocument {
+  constructor() {
+    let keys = get_handler_keys(this);
+    if (globalThis.document) {
+      this.__proxy__ = create_obj_proxy(this, keys, globalThis.document);
+      this.__target__ = globalThis.document;
+    }   
+  }
+
   get cookie() {return ""}
   set cookie(value) {}
   get body() {return this.__target__.body}

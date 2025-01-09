@@ -1,8 +1,10 @@
 import * as network from "./network.mjs";
 import * as polyfill from "./polyfill/index.mjs";
 import * as intercept from "./intercept/index.mjs";
+import * as parser from "./parser.mjs";
 
 export const is_worker = typeof importScripts === "function";
+export const ctx_vars = [];
 const internal = {
   location: null,
   self: null,
@@ -13,7 +15,59 @@ const internal = {
   sessionStorage: null
 };
 
-class CustomCTX {
+function create_func_proxy(target, func) {
+  let proxy = new Proxy(func, {
+    apply: function(func_target, this_arg, args) {
+      return Reflect.apply(func_target, target, args);
+    }
+  });
+  proxy.apply = function(this_arg, args) {
+    if (this_arg) this_arg = target
+    return Reflect.apply(func, this_arg, args);
+  }
+  proxy.call = function(this_arg, ...args) {
+    if (this_arg) this_arg = target
+    return Reflect.apply(func, this_arg, args);
+  }
+  return proxy;
+}
+
+export function get_handler_keys(obj) {
+  let keys = [];
+  let own_keys = Reflect.ownKeys(Object.getPrototypeOf(obj));
+  for (let key of own_keys) {
+    if (key === "constructor") continue;
+    if (key.startsWith("__")) continue;
+    keys.push(key);
+  }
+  return keys;
+}
+
+export function create_obj_proxy(obj, ctx_vars, target) {
+  return new Proxy(target, {
+    get: (_, key) => {
+      if (typeof obj[key] !== "undefined")
+        return obj[key];
+      if (typeof target[key] === "function" && !target[key].prototype) 
+        return create_func_proxy(target, target[key]);
+      return target[key];
+    },
+    set: (_, key, value) => {
+      if (ctx_vars.includes(key))
+        obj[key] = value;
+      else
+        target[key] = value;
+      return true;
+    }
+  });
+}
+
+export class CustomCTX {
+  constructor() {
+    ctx_vars.push(...get_handler_keys(this));
+    this.__proxy__ = create_obj_proxy(this, ctx_vars, globalThis);
+  }
+
   set location(value) {internal.location.assign(value)}
   get location() {return internal.location}
 
@@ -22,11 +76,11 @@ class CustomCTX {
   set globalThis(value) {internal.globalThis = value}
   get globalThis() {return internal.globalThis}
 
-  get window() {return this}
+  get window() {return this.__proxy__}
   get origin() {return this.location.origin}
-  get document() {return is_worker ? undefined : intercept.document}
-  get parent() {return this}
-  get top() {return this}
+  get document() {return is_worker ? undefined : intercept.document.__proxy__}
+  get parent() {return this.__proxy__}
+  get top() {return this.__proxy__}
 
   fetch() {return polyfill.fetch(...arguments)}
   get URL() {return polyfill.FakeURL}
@@ -41,7 +95,7 @@ class CustomCTX {
 
   __get_this__(this_obj) {
     if (this_obj === globalThis)
-      return this;
+      return ctx.__proxy__;
     return this_obj;
   }
 }
@@ -101,15 +155,26 @@ export function wrap_obj(wrapper, target) {
 
 export function update_ctx() {
   internal.location = new polyfill.FakeLocation();
-  internal.self = ctx;
-  internal.globalThis = ctx;
+  internal.self = ctx.__proxy__;
+  internal.globalThis = ctx.__proxy__;
   internal.history = new polyfill.FakeHistory();
   internal.localStorage = new polyfill.FakeStorage("local");
   internal.sessionStorage = new polyfill.FakeStorage("session");
   delete globalThis.caches;
 
+  /*
+  console.error = new Proxy(console.error, {
+    apply(target, this_arg, args) {
+      let ret = Reflect.apply(target, this_arg, args);
+      debugger;
+      return ret;
+    }
+  })
+  */
+ 
   //wrap function calls
-  wrap_obj(ctx, globalThis);
+  //wrap_obj(ctx, globalThis);
+  /*
   delete ctx.eval;
 
   //wrap window events
@@ -120,6 +185,10 @@ export function update_ctx() {
       set: (value) => {globalThis[key] = value}
     });
   }
+  */
+
+  globalThis.__ctx__ = ctx.__proxy__;
+  globalThis.__get_this__ = ctx.__get_this__;
 }
 
 export function convert_url(url, base) {
@@ -140,33 +209,34 @@ export function safe_script_template(js) {
   `;
 }
 
-export function run_script_safe(js, this_arg=ctx) {
+export function run_script_safe(js) {
   try {
-    run_script(safe_script_template(js), this_arg);
+    run_script(js);
   }
   catch (e) {
-    if (e instanceof SyntaxError)
-      console.error(e, js);
-    else
-      console.error(e);
+    console.error(e);
   }
 }
 
-export function run_script(js, this_obj=ctx) {
+export function run_script(js) {
   //indirect eval preserves global variables
-  /*
-  return eval?.(`
-    with (sandstone_frame.context.ctx) {
-      ${js}
-    }
-  `);
-  */
-  
-  return Reflect.apply(Function("__ctx__", `
-    with (__ctx__) {
-      ${js}
-    }
-  `), this_obj, [ctx]);  
+  let rewritten_js = parser.rewrite_js(js);
+  if (!globalThis.document || !globalThis.document.body) {
+    eval?.(rewritten_js);
+    return;
+  }
+  try {
+    let script = document.createElement("script");
+    script.setAttribute("__no_rewrite__", "1");
+    script.innerHTML = rewritten_js;
+    document.body.append(script);
+    script.remove();
+  }
+  catch (e) {
+    if (e instanceof SyntaxError)
+      console.error(e, rewritten_js);
+    throw e;
+  }
 }
 
 export function intercept_property(target, key, handler) {

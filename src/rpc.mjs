@@ -174,7 +174,7 @@ export function set_on_attach(callback) {
 }
 
 //create an rpc target for the host if we are in a child frame
-if (self.parent || typeof globalThis.importScripts === "function") {
+if (self.parent !== globalThis || typeof globalThis.importScripts === "function") {
   host = new RPCTarget();
   host.onmessage = message_listener;
   self.addEventListener("message", host_set_handler);

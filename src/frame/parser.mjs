@@ -1,4 +1,5 @@
 import * as util from "../util.mjs";
+import { ctx, ctx_vars } from "./context.mjs";
 
 import * as meriyah from "meriyah";
 import * as astray from 'astray';
@@ -13,14 +14,8 @@ class ASTVisitor {
     this.function_depth = 0;
     this.for_init = false;
 
-    this.create_handler("FunctionDeclaration");
-    this.create_handler("BlockStatement");
-    this.create_handler("ClassDeclaration");
-    this.create_handler("VariableDeclaration");
-    this.create_handler("ForStatement");
     this.create_handler("ThisExpression");
-    this.create_handler("FunctionExpression");
-    this.create_handler("ArrowFunctionExpression");
+    this.create_handler("Identifier");
   }
 
   create_handler(type) {
@@ -32,68 +27,6 @@ class ASTVisitor {
         enter: this[type + "_Enter"]?.bind(this),
         exit: this[type + "_Exit"]?.bind(this)
       }
-    }
-  }
-
-  FunctionDeclaration_Enter() {
-    this.function_depth++;
-  }
-  FunctionDeclaration_Exit(node) {
-    this.function_depth--;
-    if (this.block_depth === 0)
-      this.rewrites.push({type: "var", pos: node.end, name: node.id.name});
-  }
-  FunctionExpression_Enter(node) {
-    this.function_depth++;
-  }
-  FunctionExpression_Exit() {
-    this.function_depth--;
-  }
-  ArrowFunctionExpression_Enter() {
-    this.function_depth++;
-  }
-  ArrowFunctionExpression_Exit() {
-    this.function_depth--;
-  }
-
-  BlockStatement_Enter() {
-    this.block_depth++;
-    if (this.for_init) 
-      this.for_init = false;
-  }
-  BlockStatement_Exit() {
-    this.block_depth--;
-  }
-
-  ForStatement_Enter() {
-    this.for_init = true;
-  }
-  ForStatement_Exit() {
-    this.for_init = false;
-  }
-
-  ClassDeclaration_Exit(node) {
-    if (this.block_depth === 0)
-      this.rewrites.push({type: "var", pos: node.end, name: node.id.name});
-  }
-
-  ExpressionStatement_Exit(node) {
-    if (!node.expression.left) 
-      return;
-    if (!node.expression.left.type === "Identifier") 
-      return;
-    this.rewrites.push({type: "var", pos: node.end, name: node.expression.left.name});
-  }
-
-  VariableDeclaration_Exit(node) {
-    if (this.for_init) 
-      return;
-    if (this.block_depth !== 0 && this.function_depth !== 0) 
-      return;
-    for (let decl of node.declarations) {
-      if (this.block_depth !== 0 && node.kind !== "var") 
-        continue;
-      this.rewrites.push({type: "var", pos: node.end, name: decl.id.name});
     }
   }
 
@@ -109,18 +42,35 @@ class ASTVisitor {
     }
     this.rewrites.push({type: "this", pos: node.start, end: node.end, parentheses: parentheses});
   }
+
+  Identifier(node) {
+    let parent = node.path.parent;
+    if (parent.type === "MemberExpression" && parent.start !== node.start) 
+      return;
+    let ignored_parents = [
+      "Property", "FunctionDeclaration", "AssignmentPattern", 
+      "FunctionExpression", "ArrowFunctionExpression", "MethodDefinition",
+      "VariableDeclarator"
+    ];
+    if (ignored_parents.includes(parent.type))
+      return;
+    if (!ctx_vars.includes(node.name)) 
+      return;
+    
+    this.rewrites.push({type: "global", pos: node.start});
+  }
 }
 
 function gen_rewrite_code(rewrite) {
-  if (rewrite.type === "var") {
-    let replacement = `; if (typeof ${rewrite.name} !== "undefined") {__ctx__.${rewrite.name} = ${rewrite.name}}; `;
-    return [replacement, rewrite.pos];
-  }
   if (rewrite.type === "this") {
-    let replacement = `__ctx__.__get_this__(this)`;
+    let replacement = `__get_this__(this)`;
     if (rewrite.parentheses)
       replacement = `(${replacement})`;
     return [replacement, rewrite.pos + 4];
+  }
+  else if (rewrite.type === "global") {
+    let replacement  = `__ctx__.`;
+    return [replacement, rewrite.pos];
   }
   throw new Error("invalid rewrite type");
 }

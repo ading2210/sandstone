@@ -13,6 +13,7 @@ let frame_url = null;
 let frame_html = `
   <!DOCTYPE html>
   <head>
+    <meta charset="utf-8">
     <script>${frame_js}</script>
     <style>
       html {

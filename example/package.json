@@ -8,8 +8,8 @@
     "build": "node inline.mjs"
   },
   "dependencies": {
-    "@mercuryworkshop/wisp-js": "^0.3.2",
-    "express": "^4.21.1",
+    "@mercuryworkshop/wisp-js": "^0.3.3",
+    "express": "^4.21.2",
     "morgan": "^1.10.0"
   },
   "author": "ading2210",

@@ -1,5 +1,4 @@
 import * as rewrite from "./index.mjs";
-import * as parser from "../parser.mjs";
 
 import { parse_css } from "./css.mjs";
 import { ctx, run_script } from "../context.mjs";
@@ -38,8 +37,7 @@ function rewrite_element_single(element) {
     element.setAttribute("__" + attribute, handler_script);
     element.removeAttribute(attribute);
     element.addEventListener(event_name, () => {
-      let rewritten_js = parser.rewrite_js(handler_script);
-      run_script(rewritten_js, element);
+      run_script(handler_script, element);
     });
   }
 

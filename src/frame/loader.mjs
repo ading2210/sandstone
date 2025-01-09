@@ -1,7 +1,6 @@
 import * as rpc from "../rpc.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
-import * as parser from "./parser.mjs";
 
 import { custom_document } from "./intercept/document.mjs";
 import { update_ctx, run_script, run_script_safe, ctx, safe_script_template, wrap_obj, convert_url } from "./context.mjs";
@@ -17,7 +16,30 @@ export let frame_html; //the html for the frame runtime
 export let version; //the sandstone version
 export let is_loaded = false;
 
+function eval_script(script_element, script_text) {
+  ctx.document.currentScript = script_element;
+  run_script_safe(script_text);
+  ctx.document.currentScript = null;
+}
+
 function evaluate_scripts() {
+  pending_scripts.sort((a, b) => a[0] - b[0]);
+  let deferred = [];
+  for (let [num, script_element, script_text] of pending_scripts) {
+    if (script_element.defer || script_element.async) {
+      deferred.push([script_element, script_text])
+    }
+    else {
+      eval_script(script_element, script_text);
+    }
+  }
+  pending_scripts.length = 0;
+
+  for (let [script_element, script_text] of deferred) {
+    eval_script(script_element, script_text);
+  }
+
+  return;
   let script_elements = document.getElementsByTagName("script");
   let script_strings = [];
 
@@ -34,17 +56,11 @@ function evaluate_scripts() {
     }
   }
   
-  let wrapped_scripts = [];
   for (let [script_id, script] of script_strings) {
-    let rewritten_js = parser.rewrite_js(script);
-    let script_part = `
-      document.currentScript = document.querySelector("script[__script_id='${script_id}']");
-      ${safe_script_template(rewritten_js)}
-      document.currentScript = null;
-    `;
-    wrapped_scripts.push(script_part);
+    ctx.document.currentScript = document.querySelector(`script[__script_id='${script_id}']`);
+    run_script_safe(script);
+    ctx.document.currentScript = null;
   }
-  run_script_safe(wrapped_scripts.join("\n\n"));
 
   for (let script_element of script_elements) {
     script_element.dispatchEvent(new Event("load"));
@@ -109,8 +125,7 @@ async function load_html(options) {
 
     if (element.href.startsWith("javascript:")) {
       let original_js = element.href.replace("javascript:", "");
-      let rewritten_js = parser.rewrite_js(original_js);
-      run_script_safe(rewritten_js)
+      run_script_safe(original_js)
     }
     else {
       let original_href = convert_url(element.href, ctx.location.href);
@@ -130,7 +145,7 @@ async function load_html(options) {
   //apply the rewritten html
   console.log("done downloading page");
   document.documentElement.replaceWith(html.documentElement);
-  wrap_obj(custom_document, document);
+  //wrap_obj(custom_document, document);
   evaluate_scripts();
 
   //trigger load events
@@ -138,7 +153,7 @@ async function load_html(options) {
   ctx.document.dispatchEvent(new Event("DOMContentLoaded"));
   ctx.document.dispatchEvent(new Event("readystatechange"));
   ctx.document.dispatchEvent(new Event("load"));
-  ctx.dispatchEvent(new Event("load"));
+  ctx.window.dispatchEvent(new Event("load"));
 }
 
 async function get_favicon() {
