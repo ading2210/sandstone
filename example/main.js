@@ -23,8 +23,10 @@ main_frame.on_navigate = () => {
 
 main_frame.on_load = async () => {
   url_box.value = main_frame.url.href;
-  let favicon = await main_frame.get_favicon();
-  if (favicon === null) return;
+  let favicon_url = await main_frame.get_favicon();
+  let response = await sandstone.libcurl.fetch(favicon_url);
+  if (!response.ok) return;
+  let favicon = await response.blob();
   favicon_img.src = URL.createObjectURL(favicon);
   favicon_img.style.display = "initial";
   favicon_text.style.display = "none";  

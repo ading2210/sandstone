@@ -47,10 +47,11 @@ class ASTVisitor {
     let parent = node.path.parent;
     if (parent.type === "MemberExpression" && parent.start !== node.start) 
       return;
+    if (parent.type === "VariableDeclarator" && parent.id === node)
+      return
     let ignored_parents = [
       "Property", "FunctionDeclaration", "AssignmentPattern", 
-      "FunctionExpression", "ArrowFunctionExpression", "MethodDefinition",
-      "VariableDeclarator"
+      "FunctionExpression", "ArrowFunctionExpression", "MethodDefinition"
     ];
     if (ignored_parents.includes(parent.type))
       return;
@@ -80,6 +81,7 @@ export function rewrite_js(js) {
   let ast
   try {
     ast = meriyah.parse(js, {ranges: true, webcompat: true});
+    console.log(ast);
   }
   catch (e) {
     console.error("parse error", e);

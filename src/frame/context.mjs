@@ -88,12 +88,12 @@ export class CustomCTX {
   get parent() {
     if (loader.is_iframe)
       return globalThis.parent;
-    return this.__proxy__
+    return this.__proxy__;
   }
   get top() {
     if (loader.is_iframe)
       return globalThis.parent;
-    return this.__proxy__
+    return this.__proxy__;
   }
 
   fetch() {return polyfill.fetch(...arguments)}

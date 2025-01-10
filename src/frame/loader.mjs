@@ -144,13 +144,12 @@ async function get_favicon() {
     let link = link_elements[i];
     if (link.getAttribute("rel") === "icon") 
       favicon_url = link.getAttribute("href");
-    if (link.getAttribute("rel") === "shortcut icon") 
+    if (link.getAttribute("rel") === "__shortcut icon") 
       favicon_url = link.getAttribute("href");
   }
 
-  let response = await network.fetch(favicon_url);
-  if (!response.ok) return null;
-  return await response.blob();
+  let full_url = new URL(favicon_url, ctx.location.href);
+  return full_url.href;
 }
 
 function external_eval(js) {

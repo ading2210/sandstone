@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "astray": "^1.1.1",
-    "libcurl.js": "^0.6.20",
+    "libcurl.js": "^0.6.22",
     "meriyah": "^6.0.3"
   },
   "devDependencies": {
