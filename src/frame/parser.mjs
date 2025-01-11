@@ -1,5 +1,5 @@
 import * as util from "../util.mjs";
-import { ctx, ctx_vars } from "./context.mjs";
+import { ctx_vars, unreadable_vars } from "./context.mjs";
 
 import * as meriyah from "meriyah";
 import * as astray from 'astray';
@@ -14,19 +14,13 @@ class ASTVisitor {
     this.function_depth = 0;
     this.for_init = false;
 
-    this.create_handler("ThisExpression");
-    this.create_handler("Identifier");
-  }
+    this.ThisExpression = this.ThisExpression.bind(this);
+    this.Identifier = this.Identifier.bind(this);
+    this.BlockStatement = this.BlockStatement.bind(this);
 
-  create_handler(type) {
-    if (typeof this[type] === "function") {
-      this[type] = this[type].bind(this)
-    }
-    else {
-      this[type] = {
-        enter: this[type + "_Enter"]?.bind(this),
-        exit: this[type + "_Exit"]?.bind(this)
-      }
+    let first_node = ast.body[0];
+    if (first_node && first_node.type === "ExpressionStatement" && first_node.directive === "use strict") {
+      this.rewrites.push({type: "delete", pos: first_node.start, end: first_node.end});
     }
   }
 
@@ -40,7 +34,7 @@ class ASTVisitor {
       }
       parent_node = parent_node.path.parent;
     }
-    this.rewrites.push({type: "this", pos: node.start, end: node.end, parentheses: parentheses});
+    this.rewrites.push({type: "this", pos: node.start, parentheses: parentheses});
   }
 
   Identifier(node) {
@@ -48,7 +42,7 @@ class ASTVisitor {
     if (parent.type === "MemberExpression" && parent.start !== node.start) 
       return;
     if (parent.type === "VariableDeclarator" && parent.id === node)
-      return
+      return;
     let ignored_parents = [
       "Property", "FunctionDeclaration", "AssignmentPattern", 
       "FunctionExpression", "ArrowFunctionExpression", "MethodDefinition"
@@ -57,8 +51,25 @@ class ASTVisitor {
       return;
     if (!ctx_vars.includes(node.name)) 
       return;
-    
-    this.rewrites.push({type: "global", pos: node.start});
+
+    //this behavior isn't really correct
+    let simple = false;
+    if (parent.type === "AssignmentExpression" && parent.left === node) {
+      if (node.name !== "location")
+        return;
+      simple = true;
+    }
+    this.rewrites.push({type: "global", pos: node.start, name: node.name, simple: simple});
+  }
+
+  BlockStatement(node) {
+    let first_node = node.body[0];
+    if (!first_node) 
+      return;
+
+    if (first_node.type === "ExpressionStatement" && first_node.directive === "use asm") {
+      return astray.SKIP;
+    }
   }
 }
 
@@ -70,8 +81,16 @@ function gen_rewrite_code(rewrite) {
     return [replacement, rewrite.pos + 4];
   }
   else if (rewrite.type === "global") {
-    let replacement  = `__ctx__.`;
-    return [replacement, rewrite.pos];
+    let replacement;
+    if (rewrite.simple || unreadable_vars.includes(rewrite.name)) 
+      replacement = `__ctx__.${rewrite.name}`;
+    else 
+      replacement  = `(__get_var__(${rewrite.name}, "${rewrite.name}"))`;
+    return [replacement, rewrite.pos + rewrite.name.length];
+  }
+  else if (rewrite.type === "delete") {
+    let length = rewrite.end - rewrite.pos;
+    return ["", rewrite.pos + length];
   }
   throw new Error("invalid rewrite type");
 }
@@ -81,7 +100,6 @@ export function rewrite_js(js) {
   let ast
   try {
     ast = meriyah.parse(js, {ranges: true, webcompat: true});
-    console.log(ast);
   }
   catch (e) {
     console.error("parse error", e);

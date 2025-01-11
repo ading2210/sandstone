@@ -6,6 +6,10 @@ import * as loader from "./loader.mjs";
 
 export const is_worker = typeof importScripts === "function";
 export const ctx_vars = [];
+export const unreadable_vars = ["localStorage", "sessionStorage", "importScripts"];
+if (is_worker) 
+  unreadable_vars.push("document");
+
 const internal = {
   location: null,
   self: null,
@@ -116,6 +120,14 @@ export class CustomCTX {
       return ctx.__proxy__;
     return this_obj;
   }
+
+  __get_var__(var_value, var_name) {
+    let global_obj = globalThis[var_name];
+    if (var_value === global_obj) 
+      return ctx.__proxy__[var_name];
+    else 
+      return var_value;
+  }
 }
 
 export const ctx = new CustomCTX();
@@ -182,6 +194,7 @@ export function update_ctx() {
 
   globalThis.__ctx__ = ctx.__proxy__;
   globalThis.__get_this__ = ctx.__get_this__;
+  globalThis.__get_var__ = ctx.__get_var__;
 }
 
 export function convert_url(url, base) {

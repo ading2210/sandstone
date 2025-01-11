@@ -144,7 +144,7 @@ async function get_favicon() {
     let link = link_elements[i];
     if (link.getAttribute("rel") === "icon") 
       favicon_url = link.getAttribute("href");
-    if (link.getAttribute("rel") === "__shortcut icon") 
+    if (link.getAttribute("rel") === "shortcut icon") 
       favicon_url = link.getAttribute("href");
   }
 
