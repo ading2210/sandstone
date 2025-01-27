@@ -82,7 +82,7 @@ export class WebSocket extends EventTarget {
     this.OPEN = 1;
     this.CLOSING = 2;
     this.CLOSED = 3;
-    this.status = this.CONNECTING;
+    this.readyState = this.CONNECTING;
 
     this.#ws_id = null;
     this.#connect();
@@ -111,11 +111,11 @@ export class WebSocket extends EventTarget {
 
   #forward_event(event_name, data) {
     if (event_name === "open") {
-      this.status = this.OPEN;
+      this.readyState = this.OPEN;
       this.#dispatch_event(new Event("open"));
     }
     else if (event_name === "close") {
-      this.status = this.CLOSED;
+      this.readyState = this.CLOSED;
       this.#dispatch_event(new CloseEvent("close"));
     }
     else if (event_name === "message") {
@@ -144,10 +144,10 @@ export class WebSocket extends EventTarget {
   }
 
   send(data) {
-    if (this.status === this.CONNECTING) {
+    if (this.readyState === this.CONNECTING) {
       throw new DOMException("Websocket not ready yet.");
     }
-    if (this.status === this.CLOSED) {
+    if (this.readyState === this.CLOSED) {
       return;
     }
 
@@ -167,7 +167,7 @@ export class WebSocket extends EventTarget {
   }
 
   close() {
-    this.status = this.CLOSING;
+    this.readyState = this.CLOSING;
     rpc_ws_close(loader.frame_id, this.#ws_id);
   }
 }
