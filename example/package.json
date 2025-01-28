@@ -4,8 +4,10 @@
   "description": "",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.mjs",
-    "build": "node inline.mjs"
+    "start": "node src/server.mjs",
+    "dev": "npx webpack --watch",
+    "build": "npx webpack",
+    "build:prod": "npx webpack --mode=production; node inline.mjs"
   },
   "dependencies": {
     "@mercuryworkshop/wisp-js": "^0.3.3",

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Sandstone Homepage</title>
+    <link rel="icon" type="image/png" href="/resources/logo_128.png">
+    <style>
+      :root {
+        --background-1: #0C0C0D;
+        --background-2: #18181A;
+        --border-1: #2c2726;
+        --text-color: #cccccc;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html, body {
+        height: 100%;
+        font-family: Arial, sans-serif;
+        margin: 0px;
+        background-color: var(--background-1);
+        color: var(--text-color);
+        border-color: var(--text-color);
+      }
+      body {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+      }
+      #footer {
+        position: absolute;
+        display: flex;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      #footer p {
+        font-size: 12px;
+      }
+      #header_div {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        width: min(400px, 100%);
+        margin-bottom: 24px;
+      }
+      #search_form {
+        display: flex;
+        gap: 4px;
+        width: min(400px, 100%);
+      }
+      #search_button {
+        width: 60px;
+      } 
+      #search_form * {
+        color: var(--text-color);
+        background-color: var(--background-2);
+        padding: 8px;
+        border: 1px var(--border-1) solid;
+      }
+      .spacer {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spacer"></div>
+    <div id="header_div">
+      <img src="/resources/logo_128.png" width="128px" height="128px">
+      <h1>Sandstone</h1>
+    </div>
+    <form id="search_form" action="https://search.brave.com/search" method="get">
+      <input id="search_box" class="spacer" type="text" placeholder="Search the web..." name="q">
+      <input id="search_button" type="submit">
+    </form>
+    <div class="spacer"></div>
+    
+    <div id="footer">
+      <p>Sandstone <span id="sandstone_version">v0.0.0</span></p>
+      <div class="spacer"></div>
+      <p>Copyright © 2025 ading2210. Licensed under the GNU AGPL v3.</p>
+    </div>
+  </body>
+</html>

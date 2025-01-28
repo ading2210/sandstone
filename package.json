@@ -8,7 +8,7 @@
   "homepage": "https://github.com/ading2210/sandstone",
   "author": "ading2210",
   "license": "AGPL-3.0-only",
-  "main": "src/index.mjs",
+  "main": "dist/sandstone.mjs",
   "scripts": {
     "build": "npx webpack",
     "build:prod": "npx webpack --mode=production",

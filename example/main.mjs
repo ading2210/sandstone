@@ -1,3 +1,5 @@
+import * as sandstone from "../dist/sandstone.mjs";
+
 let from_id = (id) => document.getElementById(id);
 
 let favicon_img = from_id("favicon_img");
