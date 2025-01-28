@@ -29,17 +29,21 @@
         flex-direction: column;
         align-items: center;
       }
+      a, a:visited, a:hover, a:active {
+        color: inherit;
+      }
       #footer {
         position: absolute;
         display: flex;
-        bottom: 0px;
+        bottom: 8px;
         left: 0px;
         width: 100%;
         padding-left: 8px;
         padding-right: 8px;
       }
-      #footer p {
+      #footer a {
         font-size: 12px;
+        text-decoration: none;
       }
       #header_div {
         display: flex;
@@ -75,14 +79,14 @@
     </div>
     <form id="search_form" action="https://search.brave.com/search" method="get">
       <input id="search_box" class="spacer" type="text" placeholder="Search the web..." name="q">
-      <input id="search_button" type="submit">
+      <input id="search_button" type="submit" value="Submit">
     </form>
     <div class="spacer"></div>
     
     <div id="footer">
-      <p>Sandstone <span id="sandstone_version">v0.0.0</span></p>
+      <a href="https://github.com/ading2210/sandstone">Sandstone <span id="sandstone_version">v0.0.0</span></a>
       <div class="spacer"></div>
-      <p>Copyright © 2025 ading2210. Licensed under the GNU AGPL v3.</p>
+      <a href="https://github.com/ading2210/sandstone/blob/main/LICENSE">Copyright © 2025 ading2210. Licensed under the GNU AGPL v3.</a>
     </div>
   </body>
 </html>

@@ -62,6 +62,7 @@ a, a:hover, a:visited, a:active {
 
 #frame_container {
   flex-grow: 1;
+  background-color: #222222;
 }
 #frame_container iframe {
   width: 100%;

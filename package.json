@@ -12,7 +12,8 @@
   "scripts": {
     "build": "npx webpack",
     "build:prod": "npx webpack --mode=production",
-    "dev": "npx webpack --watch"
+    "dev": "npx webpack --watch",
+    "dev:all": "concurrently 'npm run dev' 'cd example; npm run dev'"
   },
   "dependencies": {
     "astray": "^1.1.1",
@@ -20,6 +21,7 @@
     "meriyah": "^6.0.3"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "terser-webpack-plugin": "^5.3.11",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
