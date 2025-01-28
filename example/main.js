@@ -37,8 +37,9 @@ main_frame.on_url_change = () => {
 }
 
 async function navigate_clicked() {
-  if (!url_box.value.startsWith("http:") && !url_box.value.startsWith("https:")) 
-    url_box.value = "https://" + url_box.value;
+  let url = url_box.value;
+  if (!url.startsWith("http:") && !url.startsWith("https:")) 
+    url_box.value = "https://" + url;
   await main_frame.navigate_to(url_box.value);
 }
 
@@ -55,7 +56,7 @@ async function main() {
     url_box.value = location.hash.substring(1);
 
   let wisp_url = "wss://wisp.mercurywork.shop/";
-  if (location.protocol !== "http:" && location.protocol !== "https:") 
+  if (location.hostname.endsWith(".pages.dev") || (location.protocol !== "http:" && location.protocol !== "https:")) 
     sandstone.libcurl.set_websocket(wisp_url);
   else {
     wisp_url = location.origin.replace("http", "ws");

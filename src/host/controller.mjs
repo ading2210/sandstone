@@ -101,35 +101,25 @@ export class ProxyFrame {
     this.iframe.src = get_frame_bundle();
     network.clean_ws_connections(this.id);
 
-    let wait_for_load = () => {
-      new Promise((resolve) => {
-        this.iframe.onload = () => {
-          resolve();
-        }
-      })
-    }
-    let download_html = async () => {
-      try {
-        let response = await network.session.fetch(url);
-        return [false, await response.text(), response.url];  
-      }
-      catch (error) {
-        let error_msg = util.format_error(error);
-        return [error_msg, null, url];
-      }
-    }
+    let html = null;
+    let error = false;
 
-    let [error, html, final_url] = (await Promise.all([
-      wait_for_load(),
-      download_html()
-    ]))[1];
+    try {
+      let response = await network.session.fetch(url);
+      html = await response.text();
+      url = response.url;
+    }
+    catch (error) {
+      error = util.format_error(error);
+    }
+    await rpc.wait_on_frame(this.iframe);
 
     let msg_channel = new MessageChannel();
     this.rpc_target.set_target(msg_channel.port1);
     msg_channel.port1.start();
-    rpc.set_host(this.iframe, msg_channel.port2);
+    await rpc.set_host(this.iframe, msg_channel.port2);
 
-    this.url = new URL(final_url);
+    this.url = new URL(url);
     try {
       await this.send_page({
         url: this.url.href,

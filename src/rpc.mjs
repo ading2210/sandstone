@@ -150,10 +150,39 @@ export function set_host(frame, msg_port) {
   msg_target.postMessage(msg, {targetOrigin: "*", transfer: [msg_port]})
 }
 
+export async function wait_on_frame(frame) {
+  let resolved = false;
+
+  globalThis.addEventListener("message", (event) => {
+    let msg = event.data;
+    if (msg.type === "pong") 
+      resolved = true;
+  });
+  
+  while (!resolved) {
+    let msg = {
+      type: "ping",
+      id: Math.random() + ""
+    };
+    frame.contentWindow.postMessage(msg, "*");
+    await new Promise(r => setTimeout(r, 50));
+  }
+}
+
 //handle the initial set_host message from the host
 function host_set_handler(event) {
   let msg = event.data;
   let msg_port = event.ports[0];
+
+  if (msg.type === "ping") {
+    let msg = {
+      type: "pong",
+      id: Math.random() + ""
+    };
+    event.source.postMessage(msg, "*");
+    return;
+  }
+
   if (msg.type === "set_host" && msg_port) {
     if (!host.target) {
       host.set_target(msg_port);
