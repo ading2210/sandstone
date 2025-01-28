@@ -17,7 +17,7 @@ const eval_js_input = from_id("eval_js_input");
 const eval_js_button = from_id("eval_js_button");
 
 const main_frame = new sandstone.controller.ProxyFrame();
-const special_pages = {
+main_frame.special_pages = {
   "sandstone://home": null,
 };
 
@@ -30,10 +30,13 @@ main_frame.on_navigate = () => {
 main_frame.on_load = async () => {
   url_box.value = main_frame.url.href;
   let favicon_url = await main_frame.get_favicon();
-  let response = await sandstone.libcurl.fetch(favicon_url);
-  if (!response.ok) return;
-  let favicon = await response.blob();
-  favicon_img.src = URL.createObjectURL(favicon);
+  if (!favicon_url.startsWith("data:")) {
+    let response = await sandstone.libcurl.fetch(favicon_url);
+    if (!response.ok) return;
+    let favicon = await response.blob();
+    favicon_url = URL.createObjectURL(favicon);
+  }
+  favicon_img.src = favicon_url;
   favicon_img.style.display = "initial";
   favicon_text.style.display = "none";  
 }
@@ -44,7 +47,7 @@ main_frame.on_url_change = () => {
 
 async function navigate_clicked() {
   let url = url_box.value;
-  if (!url.startsWith("http:") && !url.startsWith("https:")) 
+  if (!url.startsWith("http:") && !url.startsWith("https:") && !url.startsWith("sandstone:")) 
     url_box.value = "https://" + url;
   await main_frame.navigate_to(url_box.value);
 }
@@ -79,8 +82,7 @@ async function create_homepage() {
   html.getElementById("sandstone_version").textContent = version_text.textContent;
 
   let homepage_html = "<!DOCTYPE html>" + html.documentElement.outerHTML;
-  let homepage_url = URL.createObjectURL(new Blob([homepage_html], {type: "text/html"}));
-  special_pages["sandstone://home"] = homepage_url;
+  main_frame.special_pages["sandstone://home"] = homepage_html;
 }
 
 async function main() {

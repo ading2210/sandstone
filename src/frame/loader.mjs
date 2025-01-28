@@ -65,6 +65,7 @@ async function load_html(options) {
   get_frame_html();
   update_ctx();
 
+  console.log(options);
   if (options.error) {
     document.getElementById("loading_text").style.display = "none";
     document.getElementById("error_div").style.display = "initial";

@@ -80,6 +80,8 @@ export class ProxyFrame {
     this.on_navigate = () => {};
     this.on_load = () => {};
     this.on_url_change = () => {};
+
+    this.special_pages = {};
   }
 
   async wait_for_libcurl() {
@@ -104,14 +106,21 @@ export class ProxyFrame {
     let html = null;
     let error = false;
 
-    try {
-      let response = await network.session.fetch(url);
-      html = await response.text();
-      url = response.url;
+    let url_origin = `${this.url.protocol}//${this.url.hostname}`;
+    if (typeof this.special_pages[url_origin] === "string") {
+      html = this.special_pages[url_origin];
     }
-    catch (error) {
-      error = util.format_error(error);
+    else {
+      try {
+        let response = await network.session.fetch(url);
+        html = await response.text();
+        url = response.url;
+      }
+      catch (e) {
+        error = util.format_error(e);
+      }  
     }
+
     await rpc.wait_on_frame(this.iframe);
 
     let msg_channel = new MessageChannel();
@@ -130,8 +139,8 @@ export class ProxyFrame {
         version: version
       });
     }
-    catch (error) {
-      let error_msg = util.format_error(error);
+    catch (e) {
+      let error_msg = util.format_error(e);
       await this.send_page({
         url: this.url.href,
         html: html, 
