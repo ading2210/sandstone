@@ -1,21 +1,25 @@
 import * as sandstone from "../dist/sandstone.mjs";
+import resources from "./resources/index.mjs";
 
-let from_id = (id) => document.getElementById(id);
+const from_id = (id) => document.getElementById(id);
 
-let favicon_img = from_id("favicon_img");
-let favicon_text = from_id("favicon_text");
-let navigate_button = from_id("navigate_button");
-let url_box = from_id("url_box");
-let frame_container = from_id("frame_container");
-let version_text = from_id("version_text");
-let options_button = from_id("options_button");
-let options_div = from_id("options_div");
-let wisp_url_input = from_id("wisp_url_input");
-let close_options_button = from_id("close_options_button");
-let eval_js_input = from_id("eval_js_input");
-let eval_js_button = from_id("eval_js_button");
+const favicon_img = from_id("favicon_img");
+const favicon_text = from_id("favicon_text");
+const navigate_button = from_id("navigate_button");
+const url_box = from_id("url_box");
+const frame_container = from_id("frame_container");
+const version_text = from_id("version_text");
+const options_button = from_id("options_button");
+const options_div = from_id("options_div");
+const wisp_url_input = from_id("wisp_url_input");
+const close_options_button = from_id("close_options_button");
+const eval_js_input = from_id("eval_js_input");
+const eval_js_button = from_id("eval_js_button");
 
-let main_frame = new sandstone.controller.ProxyFrame();
+const main_frame = new sandstone.controller.ProxyFrame();
+const special_pages = {
+  "sandstone://home": null,
+};
 
 main_frame.on_navigate = () => {
   url_box.value = main_frame.url.href;
@@ -53,6 +57,32 @@ function toggle_options() {
   sandstone.libcurl.set_websocket(wisp_url_input.value);
 }
 
+async function create_homepage() {
+  let parser = new DOMParser();
+  let html = parser.parseFromString(resources["home.html"], "text/html");
+
+  let icon_element = document.querySelector("link[rel='icon']");
+  let icon_url = icon_element.href;
+
+  if (!icon_url.startsWith("data:")) {
+    let response = await fetch(icon_url);
+    let icon_blob = await response.blob();
+    icon_url = await new Promise((resolve) => {
+      var reader = new FileReader();
+      reader.onload = (event) => {resolve(event.target.result)}
+      reader.readAsDataURL(icon_blob);
+    });
+  }
+
+  html.querySelector("link[rel='icon']").href = icon_url;
+  html.getElementById("main_img").src = icon_url;
+  html.getElementById("sandstone_version").textContent = version_text.textContent;
+
+  let homepage_html = "<!DOCTYPE html>" + html.documentElement.outerHTML;
+  let homepage_url = URL.createObjectURL(new Blob([homepage_html], {type: "text/html"}));
+  special_pages["sandstone://home"] = homepage_url;
+}
+
 async function main() {
   if (location.hash)
     url_box.value = location.hash.substring(1);
@@ -78,6 +108,8 @@ async function main() {
   eval_js_button.onclick = () => {
     main_frame.eval_js(eval_js_input.value);
   }
+
+  await create_homepage();
   
   navigate_button.onclick = navigate_clicked;
   url_box.onkeydown = (event) => {

@@ -4,5 +4,13 @@ module.exports = {
   output: {
     filename: "sandstone_frontend.js"
   },
+  module: {
+    rules: [
+      {
+        resource: /resources\/.+\.html$/,
+        type: "asset/source"
+      },
+    ],
+  },
   mode: "development"
 }

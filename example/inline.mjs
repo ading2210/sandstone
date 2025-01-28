@@ -3,7 +3,6 @@ import * as fs from "node:fs/promises";
 
 execSync("npx inline-script-tags index.html bundled.html");
 execSync("npx inline-stylesheets bundled.html .");
-execSync("npx inline-images bundled.html .");
 
 var html = await fs.readFile("bundled.html", "utf8");
 const logo = await fs.readFile("resources/logo_128.png");

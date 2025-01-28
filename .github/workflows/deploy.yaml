@@ -17,7 +17,7 @@ jobs:
           npm run build:prod
           cd example
           npm i
-          npm run build
+          npm run build:prod
           mv bundled.html dist/index.html
 
       - name: Publish to Cloudflare Pages
