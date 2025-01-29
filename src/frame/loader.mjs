@@ -15,6 +15,7 @@ export let frame_html; //the html for the frame runtime
 export let version; //the sandstone version
 export let is_loaded = false;
 export let is_iframe = false;
+export let site_settings = {};
 
 function eval_script(script_element, script_text) {
   ctx.document.currentScript = script_element;
@@ -57,6 +58,7 @@ function get_frame_html() {
 async function load_html(options) {
   version = options.version;
   is_iframe = options.is_iframe || false;
+  site_settings = options.settings;
   network.known_urls[location.href] = options.url;
   network.enable_network();
 
@@ -127,7 +129,9 @@ async function load_html(options) {
   //apply the rewritten html
   console.log("done downloading page");
   document.documentElement.replaceWith(html.documentElement);
-  evaluate_scripts();
+  if (site_settings.allow_js) {
+    evaluate_scripts();
+  }
 
   //trigger load events
   is_loaded = true;

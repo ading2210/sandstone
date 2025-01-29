@@ -8,6 +8,8 @@ export const pending_scripts = [];
 let script_num = 0;
 
 export function should_load(element) {
+  if (!loader.site_settings.allow_js)
+    return false;
   if (!element.type || element.type === "application/javascript" || element.type === "text/javascript") 
     return true;
   return false;

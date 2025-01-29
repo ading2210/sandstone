@@ -82,6 +82,10 @@ export class ProxyFrame {
     this.on_url_change = () => {};
 
     this.special_pages = {};
+    this.site_settings = [];
+    this.default_settings = {
+      allow_js: true
+    };
   }
 
   async wait_for_libcurl() {
@@ -129,12 +133,19 @@ export class ProxyFrame {
     await rpc.set_host(this.iframe, msg_channel.port2);
 
     this.url = new URL(url);
+    
+    let settings = this.site_settings.find((item) => {
+      return item.hostname.test(this.url.hostname);
+    }) || {};
+    settings = {...this.default_settings, ...settings};
+
     try {
       await this.send_page({
         url: this.url.href,
         html: html, 
         frame_id: this.id,
         error: error,
+        settings: settings,
         local_storage: local_storage[this.url.origin],
         version: version
       });
@@ -146,6 +157,7 @@ export class ProxyFrame {
         html: html, 
         frame_id: this.id,
         error: error_msg,
+        settings: settings,
         local_storage: undefined,
         version: version
       });
