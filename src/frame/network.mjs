@@ -93,8 +93,7 @@ export class WebSocket extends EventTarget {
       headers: {
         "Origin": ctx.location.origin,
         "User-Agent": navigator.userAgent,
-      },
-      verbose: 1
+      }
     });
     this.#event_loop();
   }

@@ -62,6 +62,8 @@ export function rewrite_iframe(iframe_element) {
         frame_id: frame_id,
         error: error,
         local_storage: local_storage,
+        settings: {},
+        default_settings: loader.default_settings,
         version: loader.version,
         iframe: true
       });
@@ -74,6 +76,8 @@ export function rewrite_iframe(iframe_element) {
         frame_id: frame_id,
         error: error_msg,
         local_storage: undefined,
+        settings: {},
+        default_settings: loader.default_settings,
         version: loader.version
       });
     }

@@ -27,11 +27,11 @@ function create_func_proxy(target, func) {
     }
   });
   proxy.apply = function(this_arg, args) {
-    if (this_arg) this_arg = target
+    if (this_arg) this_arg = target;
     return Reflect.apply(func, this_arg, args);
   }
   proxy.call = function(this_arg, ...args) {
-    if (this_arg) this_arg = target
+    if (this_arg) this_arg = target;
     return Reflect.apply(func, this_arg, args);
   }
   return proxy;

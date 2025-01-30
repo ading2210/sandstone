@@ -93,7 +93,7 @@ export class ProxyFrame {
     await libcurl.load_wasm();
   }
 
-  async navigate_to(url) {
+  async navigate_to(url, form_data=null) {
     await this.wait_for_libcurl();
     if (!util.is_valid_url(url)) {
       throw TypeError("Invalid URL");
@@ -110,13 +110,21 @@ export class ProxyFrame {
     let html = null;
     let error = false;
 
-    let url_origin = `${this.url.protocol}//${this.url.hostname}`;
-    if (typeof this.special_pages[url_origin] === "string") {
-      html = this.special_pages[url_origin];
+    if (typeof this.special_pages[url] === "string") {
+      html = this.special_pages[url];
     }
     else {
       try {
-        let response = await network.session.fetch(url);
+        let options = {};
+        if (form_data) {
+          console.log("placing post request:", form_data);
+          options = {
+            method: "POST",
+            headers: {"Content-Type": form_data.enctype},
+            body: form_data.body
+          }
+        }
+        let response = await network.session.fetch(url, options);
         html = await response.text();
         url = response.url;
       }
@@ -124,20 +132,19 @@ export class ProxyFrame {
         error = util.format_error(e);
       }  
     }
-
-    await rpc.wait_on_frame(this.iframe);
-
-    let msg_channel = new MessageChannel();
-    this.rpc_target.set_target(msg_channel.port1);
-    msg_channel.port1.start();
-    await rpc.set_host(this.iframe, msg_channel.port2);
-
     this.url = new URL(url);
     
     let settings = this.site_settings.find((item) => {
       return item.hostname.test(this.url.hostname);
     }) || {};
     settings = {...this.default_settings, ...settings};
+    console.log("site settings:", settings);
+
+    await rpc.wait_on_frame(this.iframe);
+    let msg_channel = new MessageChannel();
+    this.rpc_target.set_target(msg_channel.port1);
+    msg_channel.port1.start();
+    await rpc.set_host(this.iframe, msg_channel.port2);
 
     try {
       await this.send_page({
@@ -146,6 +153,7 @@ export class ProxyFrame {
         frame_id: this.id,
         error: error,
         settings: settings,
+        default_settings: this.default_settings,
         local_storage: local_storage[this.url.origin],
         version: version
       });
@@ -158,6 +166,7 @@ export class ProxyFrame {
         frame_id: this.id,
         error: error_msg,
         settings: settings,
+        default_settings: this.default_settings,
         local_storage: undefined,
         version: version
       });
@@ -167,12 +176,12 @@ export class ProxyFrame {
   }
 }
 
-rpc.rpc_handlers["navigate"] = async (frame_id, url, reload=true) => {
+rpc.rpc_handlers["navigate"] = async (frame_id, url, reload=true, form_data=null) => {
   let frame = iframes[frame_id];
   if (!frame) return;
 
   if (reload) {
-    await frame.navigate_to(url);
+    await frame.navigate_to(url, form_data);
   }
   else {
     frame.url = new URL(url);

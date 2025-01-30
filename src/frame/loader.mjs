@@ -1,6 +1,7 @@
 import * as rpc from "../rpc.mjs";
 import * as rewrite from "./rewrite/index.mjs";
 import * as network from "./network.mjs";
+import * as parser from "./parser.mjs";
 
 import { update_ctx, run_script, run_script_safe, ctx, convert_url } from "./context.mjs";
 import { pending_scripts } from "./rewrite/script.mjs";
@@ -16,10 +17,21 @@ export let version; //the sandstone version
 export let is_loaded = false;
 export let is_iframe = false;
 export let site_settings = {};
+export let default_settings = {};
 
 function eval_script(script_element, script_text) {
   ctx.document.currentScript = script_element;
-  run_script_safe(script_text);
+  let script = document.createElement("script");
+  script.__rewritten__ = true;
+  try {
+    let rewritten_js = parser.rewrite_js(script_text);
+    script.innerHTML = rewritten_js;
+    document.body.append(script);
+  }
+  catch (e) {
+    console.error(e);
+  }
+  script.remove();
   ctx.document.currentScript = null;
   script_element.dispatchEvent(new Event("load"));
 }
@@ -58,7 +70,8 @@ function get_frame_html() {
 async function load_html(options) {
   version = options.version;
   is_iframe = options.is_iframe || false;
-  site_settings = options.settings;
+  default_settings = options.default_settings;
+  site_settings = {...default_settings, ...options.settings};
   network.known_urls[location.href] = options.url;
   network.enable_network();
 

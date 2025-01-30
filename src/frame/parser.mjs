@@ -17,11 +17,6 @@ class ASTVisitor {
     this.ThisExpression = this.ThisExpression.bind(this);
     this.Identifier = this.Identifier.bind(this);
     this.BlockStatement = this.BlockStatement.bind(this);
-
-    let first_node = ast.body[0];
-    if (first_node && first_node.type === "ExpressionStatement" && first_node.directive === "use strict") {
-      this.rewrites.push({type: "delete", pos: first_node.start, end: first_node.end});
-    }
   }
 
   ThisExpression(node) {

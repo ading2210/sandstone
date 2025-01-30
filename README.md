@@ -13,7 +13,10 @@ Sandstone is an experimental web proxy utilizing sandboxed iframes and no servic
 ## Site Support
 - [Discord](https://discord.com/app)
   - The login page does work, but not the captcha
+  - Works in v0.1.1 but not v0.2.0
 - [v86](https://copy.sh/v86/)
+- [Minecraft Classic](https://classic.minecraft.net/)
+- Youtube embeds
 - Most static sites
 
 ## Status

@@ -17,6 +17,9 @@ const eval_js_input = from_id("eval_js_input");
 const eval_js_button = from_id("eval_js_button");
 
 const main_frame = new sandstone.controller.ProxyFrame();
+globalThis.sandstone = sandstone;
+globalThis.main_frame = main_frame;
+
 main_frame.special_pages = {
   "sandstone://home": null,
 };
@@ -121,6 +124,8 @@ async function main() {
   }
   frame_container.append(main_frame.iframe);
   await navigate_clicked();
+
+  frame_container.style.backgroundColor = "unset";
 }
 
 main();
