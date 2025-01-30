@@ -2,7 +2,9 @@
 
 [<img src="https://upload.wikimedia.org/wikipedia/commons/a/af/USDA_Mineral_Sandstone_93c3955.jpg?20050520171627" height="128px">](https://commons.wikimedia.org/wiki/File:USDA_Mineral_Sandstone_93c3955.jpg)
 
-Sandstone is an experimental web proxy utilizing sandboxed iframes and no service worker.
+Sandstone is an experimental web proxy utilizing sandboxed iframes and no service worker. It is able to run from within a local HTML file, so it can avoid being blocked in many situations.
+
+Try it here: https://sandstone.pages.dev/
 
 ## Features
 - Every proxied page runs in a sandboxed iframe
@@ -14,9 +16,12 @@ Sandstone is an experimental web proxy utilizing sandboxed iframes and no servic
 - [Discord](https://discord.com/app)
   - The login page does work, but not the captcha
   - Works in v0.1.1 but not v0.2.0
+- [Amazon](https://www.amazon.com/)
 - [v86](https://copy.sh/v86/)
 - [Minecraft Classic](https://classic.minecraft.net/)
 - Youtube embeds
+- Some HTML5 games
+  - [Slither.io](https://slither.io/)
 - Most static sites
 
 ## Status
@@ -37,6 +42,7 @@ This is at a very early stage of development and lacks support for most web APIs
 ### Notable Unimplemented Features
 - Cookies
 - ES6 modules
+- HTTP request caching
 
 ## Usage
 ### Building
@@ -47,12 +53,13 @@ This is at a very early stage of development and lacks support for most web APIs
 ### Running the Example Frontend
 1. Cd into the `example` subdirectory
 2. Run `npm i` to install the server dependencies
-3. Run `npm run start` which will start the web server
+3. Run `npm run build:prod` to bundle the frontend JS.
+4. Run `npm run start` which will start the web server
 
 ## License
 ```
 ading2210/sandstone - A web proxy using sandboxed iframes 
-Copyright (C) 2024 ading2210
+Copyright (C) 2025 ading2210
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
