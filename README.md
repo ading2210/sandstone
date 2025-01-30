@@ -2,7 +2,9 @@
 
 [<img src="https://upload.wikimedia.org/wikipedia/commons/a/af/USDA_Mineral_Sandstone_93c3955.jpg?20050520171627" height="128px">](https://commons.wikimedia.org/wiki/File:USDA_Mineral_Sandstone_93c3955.jpg)
 
-Sandstone is an experimental web proxy utilizing sandboxed iframes and no service worker. It is able to run from within a local HTML file, so it can avoid being blocked in many situations.
+Sandstone is an experimental web proxy utilizing sandboxed iframes and no service worker. 
+
+Traditional web proxies like [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) require you to visit a domain that is unblocked, leading to a whack-a-mole situation of having these domains be blocked and trying to find new ones. Sandstone on the other hand is able to run from within a local HTML file, so it can avoid being blocked in many situations. Additionally, traditional web proxies do not sandbox the proxied pages, so any site can take control of the proxy as a whole and steal credentials. Sandstone avoids this by putting the proxied pages inside a [sandboxed iframe](https://www.w3schools.com/tags/att_iframe_sandbox.asp), so they absolutely cannot access the parent page.
 
 Try it here: https://sandstone.pages.dev/
 
@@ -15,12 +17,12 @@ Try it here: https://sandstone.pages.dev/
 ## Site Support
 - [Discord](https://discord.com/app)
   - The login page does work, but not the captcha
-  - Works in v0.1.1 but not v0.2.0
+  - Note: works in v0.1.1 but not v0.2.0
 - [Amazon](https://www.amazon.com/)
 - [v86](https://copy.sh/v86/)
-- [Minecraft Classic](https://classic.minecraft.net/)
 - Youtube embeds
-- Some HTML5 games
+- Some HTML5 games, such as:
+  - [Minecraft Classic](https://classic.minecraft.net/)
   - [Slither.io](https://slither.io/)
 - Most static sites
 
