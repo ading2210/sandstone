@@ -35,15 +35,18 @@
       #footer {
         position: absolute;
         display: flex;
+        align-items: end;
         bottom: 8px;
         left: 0px;
         width: 100%;
         padding-left: 8px;
         padding-right: 8px;
       }
-      #footer a {
+      #footer a, #footer p {
         font-size: 12px;
         text-decoration: none;
+        margin: 0px;
+        margin-top: 4px;
       }
       #header_div {
         display: flex;
@@ -84,9 +87,15 @@
     <div class="spacer"></div>
     
     <div id="footer">
-      <a href="https://github.com/ading2210/sandstone">Sandstone <span id="sandstone_version">v0.0.0</span></a>
+      <div>
+        <p><a href="https://github.com/ading2210/sandstone">Sandstone <span id="sandstone_version">v0.0.0</span></a></p>
+        <p>Tip: You can save this page as an "HTML only" file and the proxy will still work.</p>
+      </div>
       <div class="spacer"></div>
-      <a href="https://github.com/ading2210/sandstone/blob/main/LICENSE">Copyright © 2025 ading2210. Licensed under the GNU AGPL v3.</a>
+      <div style="text-align: right;">
+        <p>Source code: <a href="https://github.com/ading2210/sandstone">https://github.com/ading2210/sandstone</a></p>
+        <p><a href="https://github.com/ading2210/sandstone/blob/main/LICENSE">Copyright &copy; 2025 ading2210. Licensed under the GNU AGPL v3.</a></p>
+      </div>
     </div>
   </body>
 </html>

@@ -26,7 +26,7 @@ export class FakeXMLHttpRequest extends EventTarget {
     this.timeout = 0;
     this.responseType = "";
     this.withCredentials = false;
-    
+
     this.#setup_listeners(["abort", "error", "load", "loadend", "loadstart", "progress", "readystatechange", "timeout"], this);
     this.#setup_listeners(["abort", "error", "load", "loadend", "loadstart", "progress", "timeout"], this.upload);
   }
@@ -56,12 +56,11 @@ export class FakeXMLHttpRequest extends EventTarget {
     target.dispatchEvent(event);
     try {
       if (typeof target["on" + event.type] === "function")
-        target["on" + event.type](event);  
-    }
-    catch (e) {
+        target["on" + event.type](event);
+    } catch (e) {
       console.error(e);
     }
-  } 
+  }
 
   //note: we can't really abort requests through the rpc interface
   abort() {
@@ -90,7 +89,7 @@ export class FakeXMLHttpRequest extends EventTarget {
     console.log("DEBUG XHR.open", this, method, url, async, user, password);
 
     if (async === false) //erroring here is actually permitted by spec
-      throw new DOMException("InvalidAccessError") 
+      throw new DOMException("InvalidAccessError");
     
     this.#init_internal();
     this.readyState = this.OPENED;
@@ -123,7 +122,7 @@ export class FakeXMLHttpRequest extends EventTarget {
         this.#response = await network.fetch(this.#req_url, this.#req_options);
         this.readyState = this.HEADERS_RECEIVED;
         this.readyState = this.LOADING;
-  
+
         if (this.#aborted) return;
         this.#emit_event(new ProgressEvent("loadstart"));
         this.#response_data = await this.#response.arrayBuffer();
@@ -146,7 +145,7 @@ export class FakeXMLHttpRequest extends EventTarget {
   set readyState(value) {
     if (value !== this.#ready_state) {
       this.#ready_state = value;
-      this.#emit_event(new Event("readystatechange"))  
+      this.#emit_event(new Event("readystatechange"));
     }
   }
 
@@ -155,14 +154,35 @@ export class FakeXMLHttpRequest extends EventTarget {
   }
 
   get response() {
-    if (this.#response_data === null) 
+    if (this.#response_data === null)
       return undefined;
-    if (this.responseType === "blob") 
-      return new Blob([this.#response_data]);
-    else if (this.responseType === "arraybuffer")
-      return this.#response_data;
-    else
+    if (this.responseType === "arraybuffer") {
+      try {
+        let dest = new ArrayBuffer(this.#response_data.byteLength);
+        new Uint8Array(dest).set(new Uint8Array(this.#response_data));
+        return dest;
+      } catch (e) {
+        return null;
+      }
+    } else if (this.responseType === "blob") {
+      try {
+        return new Blob([this.#response_data]);
+      } catch (e) {
+        return null;
+      }
+    } else if (this.responseType === "document") {
+      return this.responseXML;
+    } else if (this.responseType === "json") {
+      if (this.#response_data === null)
+        return null;
+      try {
+        return JSON.parse(this.responseText);
+      } catch (e) {
+        return null;
+      }
+    } else {
       return this.responseText;
+    }
   }
 
   get responseText() {
@@ -178,10 +198,8 @@ export class FakeXMLHttpRequest extends EventTarget {
   get responseXML() {
     if (this.responseType !== "document" && this.responseType !== "")
       throw new DOMException("InvalidStateError");
-    if (this.#response === null)
+    if (this.#response === null || this.#response_data === null)
       return null;
-    if (this.#response_data === null) 
-      throw new DOMException("InvalidStateError");
     return new DOMParser().parseFromString(this.responseText, this.#mime_type || "text/html");
   }
 
