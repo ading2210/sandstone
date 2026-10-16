@@ -10,9 +10,9 @@
     "build:prod": "npx webpack --mode=production; node inline.mjs"
   },
   "dependencies": {
-    "@mercuryworkshop/wisp-js": "^0.3.3",
-    "express": "^4.21.2",
-    "morgan": "^1.10.0"
+    "@mercuryworkshop/wisp-js": "^0.5.0",
+    "express": "^5.3.0",
+    "morgan": "^1.12.1"
   },
   "author": "ading2210",
   "license": "AGPL-3.0-only",
