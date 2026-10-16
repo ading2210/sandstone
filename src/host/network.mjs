@@ -20,14 +20,10 @@ rpc_handlers["fetch"] = async function(url, options) {
   var response = await session.fetch(url, options);
   var keys = ["ok", "redirected", "status", "statusText", "type", "url", "raw_headers"];
   var payload = {
-    body: await response.blob(),
+    body: response.body,
     headers: [],
     items: {}
   };  
-  if (payload.body.type.includes(";")) {
-    let mime_type = payload.body.type.split(";")[0].trim();
-    payload.body = new Blob([payload.body], {type: mime_type});
-  }
   for (let key of keys) {
     payload.items[key] = response[key];
   }
@@ -35,7 +31,7 @@ rpc_handlers["fetch"] = async function(url, options) {
     payload.headers.push(pair);
   }
 
-  return payload
+  return [[payload.body], payload]
 }
 
 //handle websocket creation 

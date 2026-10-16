@@ -3,7 +3,7 @@ import * as loader from "./loader.mjs";
 import * as util from "../util.mjs";
 import { ctx } from "./context.mjs";
 
-export const rpc_fetch = rpc.create_rpc_wrapper(rpc.host, "fetch");
+export const rpc_fetch = rpc.create_rpc_wrapper(rpc.host, "fetch", true);
 export const rpc_ws_new = rpc.create_rpc_wrapper(rpc.host, "ws_new");
 export const rpc_ws_event = rpc.create_rpc_wrapper(rpc.host, "ws_event");
 export const rpc_ws_send = rpc.create_rpc_wrapper(rpc.host, "ws_send");
@@ -34,20 +34,29 @@ export async function fetch(url, options) {
   }
 
   let fetch_data = await rpc_fetch(url.href, options);
-  let response = new Response(fetch_data.body);
+
+  let headers = new Headers();
+  for (let [key, value] of fetch_data.headers) {
+    headers.append(key, value)
+  }
+
+  let response = new Response(fetch_data.body, {headers: headers});
   for (let key in fetch_data.items) {
     Object.defineProperty(response, key, {
       value: fetch_data.items[key]
     });
   }
 
-  let headers = new Headers();
-  for (let [key, value] of fetch_data.headers) {
-    headers.append(key, value)
+  //hack to fix invalid blob type
+  let response_proto = Object.getPrototypeOf(response);
+  response.blob = async () => {
+    let blob = await response_proto.blob.call(response);
+    let mime_type = blob.type.split(";")[0].trim();
+    Object.defineProperty(blob, "type", {
+      value: mime_type
+    });
+    return blob;
   }
-  Object.defineProperty(response, "headers", {
-    value: headers
-  });
 
   return response;
 };

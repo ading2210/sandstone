@@ -46,9 +46,16 @@ async function handle_procedure_call(msg) {
   }
 
   let output;
+  let transfers = [];
   try {
+    let value = await rpc_handlers[msg.procedure](...msg.arguments);
+    if (msg.has_transfers) {
+      transfers = value[0]
+      value = value[1]
+    }
+      
     output = {
-      value: await rpc_handlers[msg.procedure](...msg.arguments),
+      value: value,
       success: true
     };
   }
@@ -60,11 +67,12 @@ async function handle_procedure_call(msg) {
     };
   }
 
-  return {
+  let reply = {
     type: "reply",
     id: msg.id,
     content: output
   };
+  return [transfers, reply];
 }
 
 function handle_procedure_reply(msg) {
@@ -82,10 +90,10 @@ export async function message_listener(event, target) {
   console.log(`RPC ${role} got`, msg);
 
   if (msg.type === "procedure") {
-    let output = await handle_procedure_call(msg);
+    let [transfers, output] = await handle_procedure_call(msg);
     if (!source) return;
     if (output) {
-      source.postMessage(output, {targetOrigin: "*"});
+      source.postMessage(output, {targetOrigin: "*", transfer: transfers});
     }
   }
   else if (msg.type === "reply") {
@@ -104,7 +112,7 @@ export async function message_listener(event, target) {
   }
 }
 
-export async function call_procedure(target, procedure, args) {
+export async function call_procedure(target, procedure, args, has_transfers) {
   if (globalThis.HTMLIFrameElement && target instanceof globalThis.HTMLIFrameElement) {
     target = target.contentWindow || target;
   }
@@ -112,7 +120,8 @@ export async function call_procedure(target, procedure, args) {
     type: "procedure",
     id: Math.random() + "",
     procedure: procedure,
-    arguments: args
+    arguments: args,
+    has_transfers: has_transfers
   };
 
   return await new Promise((resolve, reject) => {
@@ -125,9 +134,9 @@ export async function call_procedure(target, procedure, args) {
   });
 }
 
-export function create_rpc_wrapper(target, procedure) {
+export function create_rpc_wrapper(target, procedure, has_transfers=false) {
   return function() {
-    return call_procedure(target, procedure, [...arguments]);
+    return call_procedure(target, procedure, [...arguments], has_transfers);
   }
 }
 
